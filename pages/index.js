@@ -62,7 +62,11 @@ export default function Home() {
     setLoadError("");
     try {
       const evs = await apiGet(targetId);
-      setEventsByProgram((prev) => ({ ...prev, [targetId]: evs }));
+      const targetProgram = PROGRAMS.find((p) => p.id === targetId);
+      const filtered = targetProgram
+        ? evs.filter((e) => e.title === targetProgram.title)
+        : evs;
+      setEventsByProgram((prev) => ({ ...prev, [targetId]: filtered }));
       setLastRefresh((prev) => ({ ...prev, [targetId]: new Date() }));
     } catch (e) {
       if (!silent) setLoadError(e.message);

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { getTeamColor, getTeamName } from "../lib/constants";
+import { SearchIcon, CloseIcon, RefreshIcon } from "./Icons";
 
 export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle }) {
   const dk = theme === "dark";
@@ -39,7 +40,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
       <div className="toolbar">
         <h2>All Schedules</h2>
         <div className="toolbar-right">
-          <button className="btn-refresh" onClick={onRefresh} title={refreshLabel}>↻ {refreshLabel}</button>
+          <button className="btn-refresh" onClick={onRefresh} title={refreshLabel}><RefreshIcon size={12} /> {refreshLabel}</button>
           <button className="btn-add" onClick={() => onAdd(null)}>+ Add Schedule</button>
         </div>
       </div>
@@ -73,7 +74,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         <div className="filter-group">
           <label>Details</label>
           <div className="search-wrap">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon"><SearchIcon size={14} /></span>
             <input
               type="text"
               value={filterDetails}
@@ -82,7 +83,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
               className="filter-input search-input"
             />
             {filterDetails && (
-              <button className="clear-search" onClick={() => setFilterDetails("")}>✕</button>
+              <button className="clear-search" onClick={() => setFilterDetails("")}><CloseIcon size={12} /></button>
             )}
           </div>
         </div>
@@ -160,6 +161,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         .toolbar-right { display: flex; gap: 8px; align-items: center; }
 
         .btn-refresh {
+          display: flex; align-items: center; gap: 4px;
           background: transparent; border: 1px solid ${dk ? "#2d3354" : "#d1d9e6"};
           color: ${dk ? "#8892b0" : "#718096"};
           padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; white-space: nowrap;
@@ -194,11 +196,11 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         .filter-input:focus { border-color: #4f8ef7; }
 
         .search-wrap { position: relative; display: flex; align-items: center; }
-        .search-icon { position: absolute; left: 8px; font-size: 0.75rem; pointer-events: none; }
+        .search-icon { position: absolute; left: 8px; display: flex; align-items: center; pointer-events: none; color: ${dk ? "#4a5568" : "#a0aec0"}; }
         .search-input { padding-left: 26px; padding-right: 26px; }
         .clear-search {
           position: absolute; right: 6px; background: none; border: none;
-          color: ${dk ? "#8892b0" : "#a0aec0"}; cursor: pointer; font-size: 0.75rem; padding: 2px;
+          color: ${dk ? "#8892b0" : "#a0aec0"}; cursor: pointer; display: flex; align-items: center; padding: 2px;
         }
         .clear-search:hover { color: ${dk ? "#e2e8f0" : "#1a202c"}; }
 

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { getTeamColor } from "../lib/constants";
+import { CloseIcon } from "./Icons";
 
 export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle }) {
   const dk = theme === "dark";
@@ -35,7 +36,7 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
       <div className="box" onClick={(e) => e.stopPropagation()}>
         <div className="header">
           <h2>{isEdit ? "Edit Schedule" : "Add Schedule"}</h2>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <button className="close-btn" onClick={onClose}><CloseIcon size={16} /></button>
         </div>
 
         <div className="field">
@@ -82,7 +83,7 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .header h2 { margin: 0; font-size: 1.15rem; color: ${dk ? "#e2e8f0" : "#1a202c"}; }
-        .close-btn { background: none; border: none; color: ${dk ? "#8892b0" : "#a0aec0"}; font-size: 1.1rem; cursor: pointer; padding: 4px 8px; }
+        .close-btn { background: none; border: none; color: ${dk ? "#8892b0" : "#a0aec0"}; cursor: pointer; padding: 4px; display: flex; align-items: center; }
         .close-btn:hover { color: ${dk ? "#e2e8f0" : "#1a202c"}; }
         .field { margin-bottom: 16px; }
         .field label { display: block; font-size: 0.74rem; color: ${dk ? "#8892b0" : "#718096"}; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; font-weight: 600; }

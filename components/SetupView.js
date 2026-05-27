@@ -8,7 +8,7 @@ export default function SetupView({ theme }) {
       <h2>Setup & Connection</h2>
 
       <div className={`status ${connected ? "ok" : "warn"}`}>
-        {connected ? "✅ Connected to Google Sheets" : "⚠️ Not connected — set your environment variables"}
+        {connected ? "Connected to Google Sheets" : "Not connected — set your environment variables"}
       </div>
 
       <div className="card">

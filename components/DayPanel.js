@@ -1,4 +1,5 @@
 import { getTeamColor, getTeamName } from "../lib/constants";
+import { CloseIcon } from "./Icons";
 
 export default function DayPanel({ date, events, onEdit, onAdd, onClose, theme, teams, eventTitle }) {
   const dk = theme === "dark";
@@ -19,7 +20,7 @@ export default function DayPanel({ date, events, onEdit, onAdd, onClose, theme, 
           <div className="panel-label">Schedule</div>
           <div className="panel-date">{label}</div>
         </div>
-        <button className="close-btn" onClick={onClose}>✕</button>
+        <button className="close-btn" onClick={onClose}><CloseIcon size={16} /></button>
       </div>
 
       <div className="panel-body">
@@ -50,7 +51,7 @@ export default function DayPanel({ date, events, onEdit, onAdd, onClose, theme, 
         .panel-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 20px 20px 16px; border-bottom: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; }
         .panel-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: #4f8ef7; margin-bottom: 4px; font-weight: 700; }
         .panel-date { font-size: 0.95rem; font-weight: 600; color: ${dk ? "#e2e8f0" : "#1a202c"}; }
-        .close-btn { background: none; border: none; color: ${dk ? "#8892b0" : "#a0aec0"}; font-size: 1.1rem; cursor: pointer; padding: 2px 6px; }
+        .close-btn { background: none; border: none; color: ${dk ? "#8892b0" : "#a0aec0"}; cursor: pointer; padding: 4px; display: flex; align-items: center; }
         .close-btn:hover { color: ${dk ? "#e2e8f0" : "#1a202c"}; }
         .panel-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
         .empty { color: ${dk ? "#8892b0" : "#a0aec0"}; font-size: 0.9rem; text-align: center; padding: 40px 0; }

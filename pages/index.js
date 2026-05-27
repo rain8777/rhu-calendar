@@ -5,6 +5,7 @@ import DayPanel from "../components/DayPanel";
 import SheetView from "../components/SheetView";
 import SetupView from "../components/SetupView";
 import { PROGRAMS, getTeamColor, getTeamName, MONTHS, DAYS_OF_WEEK } from "../lib/constants";
+import { CalendarIcon, ListIcon, SettingsIcon, HospitalIcon, VaccineIcon, HeartIcon, FamilyIcon, TransportIcon, MedicalIcon, SunIcon, MoonIcon, RefreshIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon, CloseIcon } from "../components/Icons";
 
 const POLL_INTERVAL = 30000;
 
@@ -155,6 +156,17 @@ export default function Home() {
     ? `Updated ${lastRef.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
     : "";
 
+  function programIcon(name) {
+    switch (name) {
+      case "hospital":     return <HospitalIcon size={18} />;
+      case "vaccine":      return <VaccineIcon size={18} />;
+      case "heart":        return <HeartIcon size={18} />;
+      case "family":       return <FamilyIcon size={18} />;
+      case "transport":    return <TransportIcon size={18} />;
+      default:             return <HospitalIcon size={18} />;
+    }
+  }
+
   return (
     <>
       <Head>
@@ -166,32 +178,32 @@ export default function Home() {
         {/* Sidebar */}
         <aside className="sidebar">
           <div className="brand">
-            <span className="brand-icon">🏥</span>
+            <span className="brand-icon"><MedicalIcon size={26} /></span>
             <div>
               <div className="brand-title">RHU Calendar</div>
-              <div className="brand-sub">{program.label} Calendar</div>
             </div>
           </div>
 
           <nav className="nav">
             {[
-              { id: "calendar", label: "📅 Calendar" },
-              { id: "list",     label: "📋 List View" },
-              { id: "setup",    label: "⚙️ Setup" },
+              { id: "calendar", label: "Calendar", icon: <CalendarIcon size={16} /> },
+              { id: "list",     label: "List View", icon: <ListIcon size={16} /> },
+              { id: "setup",    label: "Setup", icon: <SettingsIcon size={16} /> },
             ].map((item) => (
               <button
                 key={item.id}
                 className={`nav-btn ${tab === item.id ? "active" : ""}`}
                 onClick={() => setTab(item.id)}
               >
-                {item.label}
+                <span className="nav-btn-icon">{item.icon}</span>
+                <span>{item.label}</span>
               </button>
             ))}
           </nav>
 
           {/* Theme toggle */}
           <div className="theme-row">
-            <span className="theme-label">{dk ? "🌙 Dark" : "☀️ Light"}</span>
+            <span className="theme-label">{dk ? <><MoonIcon size={14} /> Dark</> : <><SunIcon size={14} /> Light</>}</span>
             <button
               className={`toggle ${dk ? "toggle-dark" : "toggle-light"}`}
               onClick={() => setTheme(dk ? "light" : "dark")}
@@ -223,7 +235,7 @@ export default function Home() {
                 className={`prog-tab ${programId === p.id ? "prog-tab-active" : ""}`}
                 onClick={() => { setProgramId(p.id); setSelectedDate(null); }}
               >
-                <span className="prog-tab-icon">{p.icon}</span>
+                <span className="prog-tab-icon">{programIcon(p.icon)}</span>
                 <span className="prog-tab-label">{p.label}</span>
                 {p.nipLabel && <span className="prog-tab-badge">{p.nipLabel}</span>}
               </button>
@@ -234,14 +246,14 @@ export default function Home() {
             <div className="cal-layout">
               <div className="cal-pane">
                 <div className="cal-header">
-                  <button className="nav-arrow" onClick={prevMonth}>‹</button>
+                  <button className="nav-arrow" onClick={prevMonth}><ChevronLeftIcon size={18} /></button>
                   <h1 className="cal-title">{MONTHS[month]} {year}</h1>
-                  <button className="nav-arrow" onClick={nextMonth}>›</button>
+                  <button className="nav-arrow" onClick={nextMonth}><ChevronRightIcon size={18} /></button>
                   <button className="btn-today" onClick={() => { setYear(today.getFullYear()); setMonth(today.getMonth()); }}>
                     Today
                   </button>
                   <button className="btn-refresh" onClick={() => loadEvents(false)} title={refreshLabel}>
-                    ↻ {refreshLabel}
+                    <RefreshIcon size={12} /> {refreshLabel}
                   </button>
                   <button className="btn-add-top" onClick={() => setModal({ event: null, defaultDate: todayStr })}>
                     + Add
@@ -363,13 +375,13 @@ export default function Home() {
           padding: 20px 16px 16px;
           border-bottom: 1px solid ${dk ? "#2d3354" : "#e2e8f0"};
         }
-        .brand-icon { font-size: 1.6rem; }
+        .brand-icon { display: flex; align-items: center; color: #4f8ef7; }
         .brand-title { font-weight: 700; font-size: 0.9rem; color: ${dk ? "#e2e8f0" : "#1a202c"}; }
         .brand-sub { font-size: 0.68rem; color: ${dk ? "#8892b0" : "#718096"}; margin-top: 2px; }
 
         .nav { padding: 12px 10px; border-bottom: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; }
         .nav-btn {
-          display: block; width: 100%; text-align: left; padding: 9px 12px;
+          display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 9px 12px;
           background: none; border: none; border-radius: 7px;
           color: ${dk ? "#8892b0" : "#4a5568"};
           cursor: pointer; font-size: 0.88rem; margin-bottom: 2px;
@@ -384,7 +396,7 @@ export default function Home() {
           padding: 10px 14px;
           border-bottom: 1px solid ${dk ? "#2d3354" : "#e2e8f0"};
         }
-        .theme-label { font-size: 0.78rem; color: ${dk ? "#8892b0" : "#718096"}; }
+        .theme-label { font-size: 0.78rem; color: ${dk ? "#8892b0" : "#718096"}; display: flex; align-items: center; gap: 6px; }
         .toggle {
           width: 40px; height: 22px; border-radius: 11px; border: none;
           cursor: pointer; position: relative; transition: background 0.2s; padding: 0;
@@ -444,7 +456,7 @@ export default function Home() {
           border-bottom: 3px solid #4f8ef7;
           font-weight: 700;
         }
-        .prog-tab-icon { font-size: 1.1rem; }
+        .prog-tab-icon { display: flex; align-items: center; }
         .prog-tab-label { font-size: 0.8rem; }
         .prog-tab-badge {
           font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em;
@@ -463,7 +475,7 @@ export default function Home() {
         .nav-arrow {
           background: ${dk ? "#1e2235" : "#ffffff"}; border: 1px solid ${dk ? "#2d3354" : "#d1d9e6"};
           color: ${dk ? "#e2e8f0" : "#1a202c"};
-          width: 32px; height: 32px; border-radius: 6px; font-size: 1.1rem;
+          width: 32px; height: 32px; border-radius: 6px;
           cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
         .nav-arrow:hover { background: ${dk ? "#2d3354" : "#e2e8f0"}; }
@@ -474,6 +486,7 @@ export default function Home() {
         }
         .btn-today:hover { color: ${dk ? "#e2e8f0" : "#1a202c"}; border-color: #4f8ef7; }
         .btn-refresh {
+          display: flex; align-items: center; gap: 4px;
           background: transparent; border: 1px solid ${dk ? "#2d3354" : "#d1d9e6"};
           color: ${dk ? "#8892b0" : "#718096"};
           padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.78rem;

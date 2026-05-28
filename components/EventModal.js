@@ -57,15 +57,23 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
           <div className="fixed-title">{eventTitle}</div>
         </div>
 
+        <div className="field">
+          <label>Activity Name (optional)</label>
+          <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Displayed on calendar — leave blank to show barangay" />
+        </div>
+
         {isActivity ? (
           <>
             <div className="field">
-              <label>Activity Name</label>
-              <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. Medical Mission, Clean-Up Drive" />
-            </div>
-            <div className="field">
               <label>Venue</label>
               <input type="text" value={venueLocation} onChange={(e) => setVenueLocation(e.target.value)} placeholder="e.g. RHU Main Office, Barangay Hall" />
+            </div>
+            <div className="field">
+              <label>Color</label>
+              <div className="color-picker-row">
+                <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="color-picker" />
+                <span className="color-hex">{color}</span>
+              </div>
             </div>
           </>
         ) : (
@@ -77,16 +85,6 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
               ))}
             </select>
             <div className="color-bar" style={{ background: getTeamColor(team) }} />
-          </div>
-        )}
-
-        {isActivity && (
-          <div className="field">
-            <label>Color</label>
-            <div className="color-picker-row">
-              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="color-picker" />
-              <span className="color-hex">{color}</span>
-            </div>
           </div>
         )}
 

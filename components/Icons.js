@@ -144,6 +144,15 @@ export function ShieldIcon({ size = 20, className }) {
   );
 }
 
+export function LeafIcon({ size = 20, className }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M11 20A7 7 0 019.5 6.5C12 4 17 3 21 3c0 4-1 9-3.5 11.5A7 7 0 0111 20z" />
+      <path d="M12.5 11.5L3 21" />
+    </svg>
+  );
+}
+
 export function RefreshIcon({ size = 14, className }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>

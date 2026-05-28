@@ -150,9 +150,9 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                       <span
                         className="team-badge"
                         style={{
-                          background:  (ev.color || "#4f8ef7") + "22",
-                          color:       ev.color || "#4f8ef7",
-                          borderColor: ev.color || "#4f8ef7",
+                          background:  (ev.color || getTeamColor(ev.team)) + "22",
+                          color:       ev.color || getTeamColor(ev.team),
+                          borderColor: ev.color || getTeamColor(ev.team),
                         }}
                       >
                         {ev.venue}

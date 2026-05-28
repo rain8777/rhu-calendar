@@ -5,7 +5,7 @@ import DayPanel from "../components/DayPanel";
 import SheetView from "../components/SheetView";
 import SetupView from "../components/SetupView";
 import { PROGRAMS, getTeamColor, getTeamName, MONTHS, DAYS_OF_WEEK } from "../lib/constants";
-import { CalendarIcon, ListIcon, SettingsIcon, HospitalIcon, VaccineIcon, HeartIcon, FamilyIcon, TransportIcon, MedicalIcon, ShieldIcon, SunIcon, MoonIcon, RefreshIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon, CloseIcon, MenuIcon, ActivityIcon } from "../components/Icons";
+import { CalendarIcon, ListIcon, SettingsIcon, HospitalIcon, VaccineIcon, HeartIcon, FamilyIcon, TransportIcon, MedicalIcon, ShieldIcon, LeafIcon, SunIcon, MoonIcon, RefreshIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon, CloseIcon, MenuIcon, ActivityIcon } from "../components/Icons";
 
 const POLL_INTERVAL = 30000;
 
@@ -178,6 +178,7 @@ export default function Home() {
       case "activity":     return <ActivityIcon size={18} />;
       case "medical":      return <MedicalIcon size={18} />;
       case "shield":       return <ShieldIcon size={18} />;
+      case "leaf":         return <LeafIcon size={18} />;
       default:             return <HospitalIcon size={18} />;
     }
   }

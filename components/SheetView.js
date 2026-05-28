@@ -6,6 +6,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
   const dk = theme === "dark";
 
   const [filterDate,     setFilterDate]     = useState("");
+  const [filterActivity, setFilterActivity] = useState("");
   const [filterBarangay, setFilterBarangay] = useState("");
   const [filterDetails,  setFilterDetails]  = useState("");
 
@@ -13,23 +14,19 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
     return [...events]
       .filter((ev) => {
         if (filterDate && ev.date !== filterDate) return false;
-        if (filterBarangay) {
-          if (ev.venue) {
-            if (!ev.venue.toLowerCase().includes(filterBarangay.toLowerCase())) return false;
-          } else {
-            if (ev.team !== filterBarangay) return false;
-          }
-        }
+        if (filterActivity && !ev.venue?.toLowerCase().includes(filterActivity.toLowerCase())) return false;
+        if (filterBarangay && ev.team !== filterBarangay) return false;
         if (filterDetails && !ev.details?.toLowerCase().includes(filterDetails.toLowerCase())) return false;
         return true;
       })
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [events, filterDate, filterBarangay, filterDetails]);
+  }, [events, filterDate, filterActivity, filterBarangay, filterDetails]);
 
-  const hasFilters = filterDate || filterBarangay || filterDetails;
+  const hasFilters = filterDate || filterActivity || filterBarangay || filterDetails;
 
   function clearFilters() {
     setFilterDate("");
+    setFilterActivity("");
     setFilterBarangay("");
     setFilterDetails("");
   }
@@ -63,7 +60,24 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           />
         </div>
 
-        {teams.length > 0 ? (
+        <div className="filter-group">
+          <label>Activity</label>
+          <div className="search-wrap">
+            <span className="search-icon"><SearchIcon size={14} /></span>
+            <input
+              type="text"
+              value={filterActivity}
+              onChange={(e) => setFilterActivity(e.target.value)}
+              placeholder="Search activity name…"
+              className="filter-input search-input"
+            />
+            {filterActivity && (
+              <button className="clear-search" onClick={() => setFilterActivity("")}><CloseIcon size={12} /></button>
+            )}
+          </div>
+        </div>
+
+        {teams.length > 0 && (
           <div className="filter-group">
             <label>Barangay</label>
             <select
@@ -76,19 +90,6 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                 <option key={t.id} value={t.id}>{t.name}</option>
               ))}
             </select>
-          </div>
-        ) : (
-          <div className="filter-group">
-            <label>Venue</label>
-            <div className="search-wrap">
-              <input
-                type="text"
-                value={filterBarangay}
-                onChange={(e) => setFilterBarangay(e.target.value)}
-                placeholder="Search activity…"
-                className="filter-input"
-              />
-            </div>
           </div>
         )}
 
@@ -290,7 +291,9 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           .sheet-table td, .sheet-table th { padding: 8px 10px; font-size: 0.8rem; }
         }
 
-        @media print { .sheet-wrap { display: none !important; } }
+        @media print {
+          @page { size: A4 portrait; margin: 0.5in; }
+        }
       `}</style>
     </div>
   );

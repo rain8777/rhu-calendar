@@ -5,6 +5,7 @@ import { CloseIcon } from "./Icons";
 export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType }) {
   const dk = theme === "dark";
   const isActivity = programType === "activity";
+  const activityRequired = eventTitle === "Family Planning";
   const defaultTeam = teams[0]?.id || "agao-ao";
   const [team,    setTeam]    = useState(event?.team    || defaultTeam);
 
@@ -24,6 +25,7 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
 
   async function handleSave() {
     if (!date) { setError("Date is required."); return; }
+    if (activityRequired && !venue.trim()) { setError("Activity Name is required."); return; }
     setSaving(true); setError("");
     const finalDetails = isActivity && venueLocation
       ? "Venue: " + venueLocation + "\n" + details
@@ -58,8 +60,8 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         </div>
 
         <div className="field">
-          <label>Activity Name (optional)</label>
-          <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Displayed on calendar — leave blank to show barangay" />
+          <label>Activity Name{activityRequired ? " *" : " (optional)"}</label>
+          <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder={activityRequired ? "Required — this displays on the calendar" : "Displayed on calendar — leave blank to show barangay"} />
         </div>
 
         {isActivity ? (

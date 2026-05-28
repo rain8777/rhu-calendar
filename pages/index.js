@@ -581,12 +581,12 @@ export default function Home() {
         .dow-cell { text-align: center; padding: 6px 0; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: ${dk ? "#8892b0" : "#a0aec0"}; }
 
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; flex: 1; overflow-y: auto; }
-        .grid-cell {
-          background: ${dk ? "#131929" : "#ffffff"};
-          border: 1px solid ${dk ? "#1e2a40" : "#e8edf5"};
-          border-radius: 6px; min-height: 90px; padding: 6px 7px;
-          cursor: pointer; transition: border-color 0.15s, background 0.15s; overflow: hidden;
-        }
+          .grid-cell {
+            min-height: 50px; padding: 3px 4px;
+            background: white !important;
+            border: 1px solid #e8edf5 !important;
+            border-radius: 2px; break-inside: avoid;
+          }
         .grid-cell.empty { background: transparent; border-color: transparent; cursor: default; }
         .grid-cell:not(.empty):hover { background: ${dk ? "#1a2040" : "#f7f9fc"}; border-color: ${dk ? "#2d3354" : "#c8d6e8"}; }
         .grid-cell.today { border-color: #4f8ef7; background: ${dk ? "#0f1d38" : "#ebf4ff"}; }
@@ -714,50 +714,32 @@ export default function Home() {
           }
           .cal-layout { display: block; overflow: visible; }
           .cal-pane { padding: 0; overflow: visible; }
-          .cal-header { margin-bottom: 10px; flex-wrap: nowrap; justify-content: center; gap: 6px; }
-          .cal-header button { display: none !important; }
-          .cal-title {
-            font-size: 1rem; color: #1a202c; flex: none;
-            text-align: center; width: auto;
-          }
-          .print-program {
-            display: inline; font-size: 0.85rem; font-weight: 600;
-            color: #4f8ef7; margin-left: 8px;
-          }
-
-          .dow-row { margin-bottom: 2px; border-bottom: 2px solid #e2e8f0; }
-          .dow-cell { font-size: 0.65rem; padding: 4px 0; color: #718096; }
-
-          .grid {
-            display: grid; grid-template-columns: repeat(7, 1fr);
-            gap: 1px; overflow: visible;
-            page-break-inside: avoid;
-          }
-          .grid-cell {
-            min-height: 70px; padding: 4px 5px;
-            background: white !important;
-            border: 1px solid #e8edf5 !important;
-            border-radius: 2px; break-inside: avoid;
-          }
-          .grid-cell.empty { background: transparent !important; border-color: transparent !important; }
-          .grid-cell.today { border-color: #4f8ef7 !important; background: #f7f9fc !important; }
-          .grid-cell.selected { border-color: #a5b4fc !important; background: white !important; }
-          .day-num { font-size: 0.7rem; color: #a0aec0; }
-
-          .day-events { gap: 1px; }
-          .day-pill {
-            font-size: 0.55rem; padding: 1px 3px;
-            border-radius: 2px; white-space: nowrap;
-            overflow: hidden; text-overflow: ellipsis;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-          }
-          .more-pill { font-size: 0.55rem; color: #a0aec0; }
-
-          .sheet-wrap,
-          .wrap { display: none !important; }
 
           ::-webkit-scrollbar { display: none; }
+        }
+      `}</style>
+
+      <style jsx global>{`
+        @media print {
+          .sheet-wrap { display: block !important; height: auto; overflow: visible; padding: 0; }
+          .sheet-wrap .toolbar,
+          .sheet-wrap .filter-bar,
+          .sheet-wrap .btn-edit,
+          .sheet-wrap .results-info { display: none !important; }
+          .sheet-wrap .table-wrap { overflow: visible; border: none; border-radius: 0; }
+          .sheet-wrap .sheet-table { min-width: auto; }
+          .sheet-wrap .sheet-table th,
+          .sheet-wrap .sheet-table td { padding: 6px 10px; font-size: 0.75rem; color: #1a202c; }
+          .sheet-wrap .sheet-table th { background: #f7f9fc; color: #718096; }
+          .sheet-wrap .sheet-table td { border-color: #e2e8f0; }
+          .sheet-wrap .sheet-table tr:last-child td { border-bottom: 1px solid #e2e8f0; }
+          .sheet-wrap .date-cell { color: #4a6cf7; }
+          .sheet-wrap .title-cell { color: #5a67d8; }
+          .sheet-wrap .details-cell { color: #718096; }
+          .sheet-wrap .team-badge { border: 1px solid; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+          .sheet-wrap .empty { display: none !important; }
+        }
+      `}</style>
         }
       `}</style>
     </>

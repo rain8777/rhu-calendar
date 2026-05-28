@@ -108,13 +108,14 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         .field { margin-bottom: 16px; }
         .field label { display: block; font-size: 0.74rem; color: ${dk ? "#8892b0" : "#718096"}; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; font-weight: 600; }
         .fixed-title { background: ${dk ? "#131929" : "#f0f4f8"}; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; border-radius: 6px; padding: 8px 12px; color: #4f8ef7; font-weight: 600; font-size: 0.95rem; }
-        select, input[type="date"], textarea {
+        select, input[type="date"], input[type="text"], textarea {
           width: 100%; background: ${dk ? "#131929" : "#f7fafc"};
           border: 1px solid ${dk ? "#2d3354" : "#d1d9e6"};
           border-radius: 6px; color: ${dk ? "#e2e8f0" : "#1a202c"};
           padding: 8px 12px; font-size: 0.9rem; box-sizing: border-box; outline: none;
         }
         select:focus, input:focus, textarea:focus { border-color: #4f8ef7; }
+        input[type="text"]::placeholder { color: ${dk ? "#4a5278" : "#a0aec0"}; }
         textarea { resize: vertical; font-family: inherit; }
         .color-bar { height: 3px; border-radius: 2px; margin-top: 6px; transition: background 0.2s; }
         .error-msg { color: #e53e3e; font-size: 0.85rem; margin-bottom: 12px; padding: 8px 12px; background: rgba(229,62,62,0.08); border-radius: 6px; }

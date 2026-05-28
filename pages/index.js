@@ -580,9 +580,9 @@ export default function Home() {
         .dow-row { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; margin-bottom: 4px; }
         .dow-cell { text-align: center; padding: 6px 0; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: ${dk ? "#8892b0" : "#a0aec0"}; }
 
-        .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; flex: 1; overflow-y: auto; }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 3px; flex: 1; overflow: hidden; }
           .grid-cell {
-            min-height: 50px; padding: 3px 4px; min-width: 0;
+            padding: 3px 4px; min-width: 0;
             background: white !important;
             border: 1px solid #e8edf5 !important;
             border-radius: 2px; break-inside: avoid;
@@ -657,7 +657,7 @@ export default function Home() {
           .cal-header { gap: 6px; }
           .cal-title { font-size: 1.05rem; }
           .btn-refresh-label { display: none; }
-          .grid-cell { min-height: 52px; padding: 4px 5px; min-width: 0; }
+          .grid-cell { padding: 4px 5px; min-width: 0; }
           .day-num { font-size: 0.72rem; margin-bottom: 2px; }
           .day-pill { font-size: 0.6rem; padding: 1px 3px; max-width: 100%; }
           .day-events { gap: 1px; }
@@ -714,6 +714,7 @@ export default function Home() {
           }
           .cal-layout { display: block; overflow: visible; }
           .cal-pane { padding: 0; overflow: visible; }
+          .grid { overflow: visible; }
 
           ::-webkit-scrollbar { display: none; }
         }

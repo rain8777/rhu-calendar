@@ -176,6 +176,7 @@ export default function Home() {
       case "family":       return <FamilyIcon size={18} />;
       case "transport":    return <TransportIcon size={18} />;
       case "activity":     return <ActivityIcon size={18} />;
+      case "medical":      return <MedicalIcon size={18} />;
       default:             return <HospitalIcon size={18} />;
     }
   }

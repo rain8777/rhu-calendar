@@ -222,12 +222,31 @@ export default function Home() {
           {/* Barangay legend */}
           <div className="legend">
             <div className="legend-title">Barangay</div>
-            {program.teams.map((t) => (
-              <div key={t.id} className="legend-item">
-                <span className="legend-dot" style={{ background: getTeamColor(t.id) }} />
-                <span>{t.name}</span>
-              </div>
-            ))}
+            {program.northTeams ? (
+              <>
+                <div className="legend-group-label">North</div>
+                {program.northTeams.map((t) => (
+                  <div key={t.id} className="legend-item">
+                    <span className="legend-dot" style={{ background: getTeamColor(t.id) }} />
+                    <span>{t.name}</span>
+                  </div>
+                ))}
+                <div className="legend-group-label" style={{ marginTop: 8 }}>South</div>
+                {program.southTeams.map((t) => (
+                  <div key={t.id} className="legend-item">
+                    <span className="legend-dot" style={{ background: getTeamColor(t.id) }} />
+                    <span>{t.name}</span>
+                  </div>
+                ))}
+              </>
+            ) : (
+              program.teams.map((t) => (
+                <div key={t.id} className="legend-item">
+                  <span className="legend-dot" style={{ background: getTeamColor(t.id) }} />
+                  <span>{t.name}</span>
+                </div>
+              ))
+            )}
           </div>
         </aside>
         {mobileMenuOpen && <div className="sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} />}
@@ -450,6 +469,10 @@ export default function Home() {
           display: flex; align-items: center; gap: 8px;
           padding: 3px 0; font-size: 0.78rem;
           color: ${dk ? "#8892b0" : "#4a5568"};
+        }
+        .legend-group-label {
+          font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.06em;
+          color: ${dk ? "#a5b4fc" : "#5a67d8"}; font-weight: 700; margin-bottom: 4px;
         }
         .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 

@@ -651,7 +651,7 @@ export default function Home() {
         .print-program { display: none; }
 
         @media print {
-          @page { size: A4; margin: 0.5in; }
+          @page { size: A4 landscape; margin: 0.5in; }
 
           html, body { height: auto; overflow: visible; background: white; }
           body.dark, body.light { background: white; color: #1a202c; }

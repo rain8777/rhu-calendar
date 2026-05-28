@@ -41,8 +41,7 @@ export default function DayPanel({ date, events, onEdit, onAdd, onClose, theme, 
               {ev.details && <div className="ev-details">{ev.details}</div>}
             </div>
             );
-          })}
-          ))
+          })
         )}
       </div>
 

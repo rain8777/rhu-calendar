@@ -15,7 +15,7 @@
  *  6. Copy the Web App /exec URL → paste into Vercel env vars
  *
  *  SHEET COLUMNS (Sheet1):
- *  A: id | B: Date | C: Title | D: Team | E: Details
+ *  A: id | B: Date | C: Title | D: Team | E: Details | F: Venue | G: Color
  */
 
 // ── CONFIG — edit these two lines ─────────────────────────────────────────────
@@ -24,8 +24,8 @@ const SECRET   = "rhucalendar"; // must match Vercel GAS_SECRET
 // ──────────────────────────────────────────────────────────────────────────────
 
 const SHEET_NAME = "Sheet1";
-const HEADERS    = ["id", "Date", "Title", "Team", "Details"];
-const COL        = { id: 0, date: 1, title: 2, team: 3, details: 4 };
+const HEADERS    = ["id", "Date", "Title", "Team", "Details", "Venue", "Color"];
+const COL        = { id: 0, date: 1, title: 2, team: 3, details: 4, venue: 5, color: 6 };
 
 // Valid team values
 const TEAMS = [
@@ -124,6 +124,8 @@ function rowToEvent(row) {
     title:   String(row[COL.title]   || EVENT_TITLE),
     team:    String(row[COL.team]    || "agao-ao"),
     details: String(row[COL.details] || ""),
+    venue:   String(row[COL.venue]   || ""),
+    color:   String(row[COL.color]   || ""),
   };
 }
 
@@ -162,9 +164,11 @@ function saveEvent(event) {
     var newRow = [
       event.id,
       event.date,
-      EVENT_TITLE,              // always fixed
-      event.team    || "agao-ao",
+      event.title || EVENT_TITLE,
+      event.team    || "",
       event.details || "",
+      event.venue   || "",
+      event.color   || "",
     ];
 
     // Search for existing row to update

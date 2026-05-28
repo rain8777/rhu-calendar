@@ -347,7 +347,6 @@ export default function Home() {
                             </div>
                             );
                           })}
-                          ))}
                           {dayEvents.length > 3 && (
                             <div className="more-pill">+{dayEvents.length - 3} more</div>
                           )}

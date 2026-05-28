@@ -7,10 +7,17 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
   const isActivity = programType === "activity";
   const defaultTeam = teams[0]?.id || "agao-ao";
   const [team,    setTeam]    = useState(event?.team    || defaultTeam);
+
+  const rawDetails = event?.details || "";
+  const parsed = isActivity && rawDetails.startsWith("Venue: ")
+    ? (() => { const i = rawDetails.indexOf("\n"); return i > -1 ? [rawDetails.slice(7, i), rawDetails.slice(i+1)] : [rawDetails.slice(7), ""]; })()
+    : [null, rawDetails];
+
   const [venue,   setVenue]   = useState(event?.venue   || "");
+  const [venueLocation, setVenueLocation] = useState(parsed[0] || "");
   const [color,   setColor]   = useState(event?.color   || "#4f8ef7");
   const [date,    setDate]    = useState(event?.date    || defaultDate || "");
-  const [details, setDetails] = useState(event?.details || "");
+  const [details, setDetails] = useState(parsed[1] || "");
   const [saving,  setSaving]  = useState(false);
   const [error,   setError]   = useState("");
   const isEdit = !!event?.id;
@@ -18,8 +25,11 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
   async function handleSave() {
     if (!date) { setError("Date is required."); return; }
     setSaving(true); setError("");
+    const finalDetails = isActivity && venueLocation
+      ? "Venue: " + venueLocation + "\n" + details
+      : details;
     try {
-      await onSave({ id: event?.id, team, venue, color, date, details });
+      await onSave({ id: event?.id, team, venue, color, date, details: finalDetails });
       onClose();
     } catch (e) {
       setError(e.message || "Save failed.");
@@ -48,10 +58,16 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         </div>
 
         {isActivity ? (
-          <div className="field">
-            <label>Venue</label>
-            <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. RHU Main Office" />
-          </div>
+          <>
+            <div className="field">
+              <label>Activity Name</label>
+              <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. Medical Mission, Clean-Up Drive" />
+            </div>
+            <div className="field">
+              <label>Venue</label>
+              <input type="text" value={venueLocation} onChange={(e) => setVenueLocation(e.target.value)} placeholder="e.g. RHU Main Office, Barangay Hall" />
+            </div>
+          </>
         ) : (
           <div className="field">
             <label>Barangay</label>

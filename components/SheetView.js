@@ -85,7 +85,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                 type="text"
                 value={filterBarangay}
                 onChange={(e) => setFilterBarangay(e.target.value)}
-                placeholder="Search venue…"
+                placeholder="Search activity…"
                 className="filter-input"
               />
             </div>
@@ -135,7 +135,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
               <tr>
                 <th>Date</th>
                 <th>Title</th>
-                <th>{teams.length > 0 ? "Barangay" : "Venue"}</th>
+                <th>{teams.length > 0 ? "Barangay" : "Activity"}</th>
                 <th>Details</th>
                 <th></th>
               </tr>

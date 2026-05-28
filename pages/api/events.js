@@ -9,6 +9,7 @@ const GAS_URL_MAP = {
   nip:           process.env.NEXT_PUBLIC_GAS_URL_NIP           || process.env.NEXT_PUBLIC_GAS_URL,
   philhealth:    process.env.NEXT_PUBLIC_GAS_URL_PHILHEALTH     || process.env.NEXT_PUBLIC_GAS_URL,
   ncd:           process.env.NEXT_PUBLIC_GAS_URL_NCD            || process.env.NEXT_PUBLIC_GAS_URL,
+  mnao:          process.env.NEXT_PUBLIC_GAS_URL_MNAO           || process.env.NEXT_PUBLIC_GAS_URL,
   familyplanning:process.env.NEXT_PUBLIC_GAS_URL_FAMILYPLANNING || process.env.NEXT_PUBLIC_GAS_URL,
   transportation:process.env.NEXT_PUBLIC_GAS_URL_TRANSPORTATION || process.env.NEXT_PUBLIC_GAS_URL,
   rhuactivities:  process.env.NEXT_PUBLIC_GAS_URL_RHUACTIVITIES   || process.env.NEXT_PUBLIC_GAS_URL,

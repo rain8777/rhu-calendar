@@ -653,7 +653,7 @@ export default function Home() {
           }
           .mob-header-spacer { flex: 1; }
 
-          .cal-pane { padding: 12px 10px; padding-bottom: 64px; }
+          .cal-pane { padding: 12px 10px; padding-bottom: 70px; }
           .cal-header { gap: 6px; }
           .cal-title { font-size: 1.05rem; }
           .btn-refresh-label { display: none; }
@@ -662,8 +662,8 @@ export default function Home() {
           .day-pill { font-size: 0.6rem; padding: 1px 3px; }
           .day-events { gap: 1px; }
 
-          .prog-tab-label { display: none; }
-          .prog-tab { padding: 6px 10px 8px; }
+          .prog-tab { padding: 6px 8px 8px; gap: 1px; }
+          .prog-tab-label { font-size: 0.62rem; display: block; }
           .prog-tab-icon svg { width: 16px; height: 16px; }
 
           .bottom-nav {

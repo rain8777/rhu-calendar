@@ -582,7 +582,7 @@ export default function Home() {
 
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; flex: 1; overflow-y: auto; }
           .grid-cell {
-            min-height: 50px; padding: 3px 4px;
+            min-height: 50px; padding: 3px 4px; min-width: 0;
             background: white !important;
             border: 1px solid #e8edf5 !important;
             border-radius: 2px; break-inside: avoid;
@@ -594,10 +594,10 @@ export default function Home() {
         .day-num { font-size: 0.8rem; font-weight: 600; color: ${dk ? "#8892b0" : "#a0aec0"}; margin-bottom: 4px; }
         .grid-cell.today .day-num { color: #4f8ef7; font-weight: 700; }
 
-        .day-events { display: flex; flex-direction: column; gap: 2px; }
+        .day-events { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
         .day-pill {
           font-size: 0.67rem; font-weight: 600; padding: 2px 5px; border-radius: 4px;
-          border: 1px solid; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+          border: 1px solid; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; cursor: pointer;
         }
         .day-pill:hover { opacity: 0.75; }
         .more-pill { font-size: 0.65rem; color: ${dk ? "#8892b0" : "#a0aec0"}; padding: 1px 4px; }
@@ -657,9 +657,9 @@ export default function Home() {
           .cal-header { gap: 6px; }
           .cal-title { font-size: 1.05rem; }
           .btn-refresh-label { display: none; }
-          .grid-cell { min-height: 52px; padding: 4px 5px; }
+          .grid-cell { min-height: 52px; padding: 4px 5px; min-width: 0; }
           .day-num { font-size: 0.72rem; margin-bottom: 2px; }
-          .day-pill { font-size: 0.6rem; padding: 1px 3px; }
+          .day-pill { font-size: 0.6rem; padding: 1px 3px; max-width: 100%; }
           .day-events { gap: 1px; }
 
           .prog-tab { padding: 6px 8px 8px; gap: 1px; }

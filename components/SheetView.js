@@ -137,7 +137,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                 <th>Date</th>
                 <th>Title</th>
                 <th>{teams.length > 0 ? "Barangay" : "Activity"}</th>
-                <th>Details</th>
+                <th>{teams.length > 0 ? "Details" : "Venue"}</th>
                 <th></th>
               </tr>
             </thead>

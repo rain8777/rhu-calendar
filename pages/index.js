@@ -5,7 +5,7 @@ import DayPanel from "../components/DayPanel";
 import SheetView from "../components/SheetView";
 import SetupView from "../components/SetupView";
 import { PROGRAMS, getTeamColor, getTeamName, MONTHS, DAYS_OF_WEEK } from "../lib/constants";
-import { CalendarIcon, ListIcon, SettingsIcon, HospitalIcon, VaccineIcon, HeartIcon, FamilyIcon, TransportIcon, MedicalIcon, SunIcon, MoonIcon, RefreshIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon, CloseIcon, MenuIcon } from "../components/Icons";
+import { CalendarIcon, ListIcon, SettingsIcon, HospitalIcon, VaccineIcon, HeartIcon, FamilyIcon, TransportIcon, MedicalIcon, SunIcon, MoonIcon, RefreshIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon, CloseIcon, MenuIcon, ActivityIcon } from "../components/Icons";
 
 const POLL_INTERVAL = 30000;
 
@@ -101,10 +101,12 @@ export default function Home() {
   async function handleSave(payload) {
     const eventData = {
       id:      payload.id || undefined,
-      team:    payload.team,
+      team:    payload.team || "",
       date:    payload.date,
       details: payload.details || "",
       title:   program.title,
+      venue:   payload.venue || "",
+      color:   payload.color || "",
     };
     const data = await apiPost({ action: "saveEvent", event: eventData }, programId);
     const gasId = data.event?.id || data.id;
@@ -173,6 +175,7 @@ export default function Home() {
       case "heart":        return <HeartIcon size={18} />;
       case "family":       return <FamilyIcon size={18} />;
       case "transport":    return <TransportIcon size={18} />;
+      case "activity":     return <ActivityIcon size={18} />;
       default:             return <HospitalIcon size={18} />;
     }
   }
@@ -220,6 +223,7 @@ export default function Home() {
           </div>
 
           {/* Barangay legend */}
+          {program.type !== "activity" && (
           <div className="legend">
             <div className="legend-title">Barangay</div>
             {program.northTeams ? (
@@ -248,6 +252,7 @@ export default function Home() {
               ))
             )}
           </div>
+          )}
         </aside>
         {mobileMenuOpen && <div className="sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} />}
 
@@ -323,20 +328,25 @@ export default function Home() {
                       >
                         <div className="day-num">{day}</div>
                         <div className="day-events">
-                          {dayEvents.slice(0, 3).map((ev) => (
+                          {dayEvents.slice(0, 3).map((ev) => {
+                            const pillColor = ev.color || getTeamColor(ev.team);
+                            const pillLabel = ev.venue || getTeamName(ev.team, program.teams);
+                            return (
                             <div
                               key={ev.id}
                               className="day-pill"
                               style={{
-                                background:  getTeamColor(ev.team) + "28",
-                                color:       getTeamColor(ev.team),
-                                borderColor: getTeamColor(ev.team),
+                                background:  pillColor + "28",
+                                color:       pillColor,
+                                borderColor: pillColor,
                               }}
                               onClick={(e) => { e.stopPropagation(); setModal({ event: ev, defaultDate: dateStr }); }}
-                              title={getTeamName(ev.team, program.teams)}
+                              title={pillLabel}
                             >
-                              {getTeamName(ev.team, program.teams)}
+                              {pillLabel}
                             </div>
+                            );
+                          })}
                           ))}
                           {dayEvents.length > 3 && (
                             <div className="more-pill">+{dayEvents.length - 3} more</div>
@@ -406,6 +416,7 @@ export default function Home() {
           theme={theme}
           teams={program.teams}
           eventTitle={program.title}
+          programType={program.type}
         />
       )}
 

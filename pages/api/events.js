@@ -10,6 +10,7 @@ const GAS_URL_MAP = {
   philhealth:    process.env.NEXT_PUBLIC_GAS_URL_PHILHEALTH     || process.env.NEXT_PUBLIC_GAS_URL,
   familyplanning:process.env.NEXT_PUBLIC_GAS_URL_FAMILYPLANNING || process.env.NEXT_PUBLIC_GAS_URL,
   transportation:process.env.NEXT_PUBLIC_GAS_URL_TRANSPORTATION || process.env.NEXT_PUBLIC_GAS_URL,
+  rhuactivities:  process.env.NEXT_PUBLIC_GAS_URL_RHUACTIVITIES   || process.env.NEXT_PUBLIC_GAS_URL,
 };
 
 export default async function handler(req, res) {

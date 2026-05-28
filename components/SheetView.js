@@ -13,7 +13,13 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
     return [...events]
       .filter((ev) => {
         if (filterDate && ev.date !== filterDate) return false;
-        if (filterBarangay && ev.team !== filterBarangay) return false;
+        if (filterBarangay) {
+          if (ev.venue) {
+            if (!ev.venue.toLowerCase().includes(filterBarangay.toLowerCase())) return false;
+          } else {
+            if (ev.team !== filterBarangay) return false;
+          }
+        }
         if (filterDetails && !ev.details?.toLowerCase().includes(filterDetails.toLowerCase())) return false;
         return true;
       })
@@ -57,19 +63,34 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           />
         </div>
 
-        <div className="filter-group">
-          <label>Barangay</label>
-          <select
-            value={filterBarangay}
-            onChange={(e) => setFilterBarangay(e.target.value)}
-            className="filter-input"
-          >
-            <option value="">All Barangays</option>
-            {(teams || []).map((t) => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
-        </div>
+        {teams.length > 0 ? (
+          <div className="filter-group">
+            <label>Barangay</label>
+            <select
+              value={filterBarangay}
+              onChange={(e) => setFilterBarangay(e.target.value)}
+              className="filter-input"
+            >
+              <option value="">All Barangays</option>
+              {(teams || []).map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+        ) : (
+          <div className="filter-group">
+            <label>Venue</label>
+            <div className="search-wrap">
+              <input
+                type="text"
+                value={filterBarangay}
+                onChange={(e) => setFilterBarangay(e.target.value)}
+                placeholder="Search venue…"
+                className="filter-input"
+              />
+            </div>
+          </div>
+        )}
 
         <div className="filter-group">
           <label>Details</label>
@@ -114,7 +135,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
               <tr>
                 <th>Date</th>
                 <th>Title</th>
-                <th>Barangay</th>
+                <th>{teams.length > 0 ? "Barangay" : "Venue"}</th>
                 <th>Details</th>
                 <th></th>
               </tr>
@@ -125,16 +146,29 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                   <td className="date-cell">{fmtDate(ev.date)}</td>
                   <td className="title-cell">{eventTitle}</td>
                   <td>
-                    <span
-                      className="team-badge"
-                      style={{
-                        background:  getTeamColor(ev.team) + "22",
-                        color:       getTeamColor(ev.team),
-                        borderColor: getTeamColor(ev.team),
-                      }}
-                    >
-                      {getTeamName(ev.team, teams)}
-                    </span>
+                    {ev.venue ? (
+                      <span
+                        className="team-badge"
+                        style={{
+                          background:  (ev.color || "#4f8ef7") + "22",
+                          color:       ev.color || "#4f8ef7",
+                          borderColor: ev.color || "#4f8ef7",
+                        }}
+                      >
+                        {ev.venue}
+                      </span>
+                    ) : (
+                      <span
+                        className="team-badge"
+                        style={{
+                          background:  getTeamColor(ev.team) + "22",
+                          color:       getTeamColor(ev.team),
+                          borderColor: getTeamColor(ev.team),
+                        }}
+                      >
+                        {getTeamName(ev.team, teams)}
+                      </span>
+                    )}
                   </td>
                   <td className="details-cell">
                     {filterDetails && ev.details ? (

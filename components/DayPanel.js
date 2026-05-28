@@ -27,17 +27,21 @@ export default function DayPanel({ date, events, onEdit, onAdd, onClose, theme, 
         {events.length === 0 ? (
           <div className="empty">No schedules for this day.</div>
         ) : (
-          events.map((ev) => (
+          events.map((ev) => {
+            const cardColor = ev.color || getTeamColor(ev.team);
+            return (
             <div
               key={ev.id}
               className="event-card"
-              style={{ borderLeftColor: getTeamColor(ev.team) }}
+              style={{ borderLeftColor: cardColor }}
               onClick={() => onEdit(ev)}
             >
               <div className="ev-title">{eventTitle}</div>
-              <div className="ev-team">{getTeamName(ev.team, teams)}</div>
+              <div className="ev-team">{ev.venue || getTeamName(ev.team, teams)}</div>
               {ev.details && <div className="ev-details">{ev.details}</div>}
             </div>
+            );
+          })}
           ))
         )}
       </div>

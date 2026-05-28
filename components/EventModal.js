@@ -2,10 +2,13 @@ import { useState } from "react";
 import { getTeamColor } from "../lib/constants";
 import { CloseIcon } from "./Icons";
 
-export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle }) {
+export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType }) {
   const dk = theme === "dark";
+  const isActivity = programType === "activity";
   const defaultTeam = teams[0]?.id || "agao-ao";
   const [team,    setTeam]    = useState(event?.team    || defaultTeam);
+  const [venue,   setVenue]   = useState(event?.venue   || "");
+  const [color,   setColor]   = useState(event?.color   || "#4f8ef7");
   const [date,    setDate]    = useState(event?.date    || defaultDate || "");
   const [details, setDetails] = useState(event?.details || "");
   const [saving,  setSaving]  = useState(false);
@@ -16,7 +19,7 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
     if (!date) { setError("Date is required."); return; }
     setSaving(true); setError("");
     try {
-      await onSave({ id: event?.id, team, date, details });
+      await onSave({ id: event?.id, team, venue, color, date, details });
       onClose();
     } catch (e) {
       setError(e.message || "Save failed.");
@@ -44,15 +47,32 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
           <div className="fixed-title">{eventTitle}</div>
         </div>
 
-        <div className="field">
-          <label>Barangay</label>
-          <select value={team} onChange={(e) => setTeam(e.target.value)}>
-            {teams.map((t) => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
-          <div className="color-bar" style={{ background: getTeamColor(team) }} />
-        </div>
+        {isActivity ? (
+          <div className="field">
+            <label>Venue</label>
+            <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="e.g. RHU Main Office" />
+          </div>
+        ) : (
+          <div className="field">
+            <label>Barangay</label>
+            <select value={team} onChange={(e) => setTeam(e.target.value)}>
+              {teams.map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+            <div className="color-bar" style={{ background: getTeamColor(team) }} />
+          </div>
+        )}
+
+        {isActivity && (
+          <div className="field">
+            <label>Color</label>
+            <div className="color-picker-row">
+              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="color-picker" />
+              <span className="color-hex">{color}</span>
+            </div>
+          </div>
+        )}
 
         <div className="field">
           <label>Date</label>
@@ -105,6 +125,9 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         .btn-ghost:hover { color: ${dk ? "#e2e8f0" : "#1a202c"}; border-color: #4f8ef7; }
         .btn-danger { background: transparent; color: #e53e3e; border: 1px solid #e53e3e; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-right: auto; }
         .btn-danger:hover { background: rgba(229,62,62,0.08); }
+        .color-picker-row { display: flex; align-items: center; gap: 10px; }
+        .color-picker { width: 40px; height: 36px; padding: 2px; border: 1px solid ${dk ? "#2d3354" : "#d1d9e6"}; border-radius: 6px; cursor: pointer; background: none; }
+        .color-hex { font-size: 0.85rem; color: ${dk ? "#8892b0" : "#718096"}; font-family: monospace; }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
 
         @media (max-width: 768px) {

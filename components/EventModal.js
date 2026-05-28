@@ -146,9 +146,14 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         button:disabled { opacity: 0.5; cursor: not-allowed; }
 
         @media (max-width: 768px) {
-          .box { padding: 20px; width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; overflow-y: auto; display: flex; flex-direction: column; }
+          .box { padding: 20px 16px; width: 100vw; max-width: 100vw; height: 90vh; max-height: 90vh; border-radius: 16px 16px 0 0; overflow-y: auto; display: flex; flex-direction: column; margin-top: auto; }
           .overlay { align-items: flex-end; }
-          .actions { margin-top: auto; padding-top: 12px; }
+          .field { margin-bottom: 12px; }
+          .field label { font-size: 0.7rem; }
+          select, input[type="date"], input[type="text"], textarea { padding: 10px 10px; font-size: 0.85rem; }
+          .actions { margin-top: auto; padding-top: 12px; gap: 8px; }
+          .btn-primary, .btn-ghost, .btn-danger { padding: 10px 14px; font-size: 0.85rem; flex: 1; text-align: center; }
+          .color-picker { width: 36px; height: 32px; }
         }
 
         @media print { .overlay { display: none !important; } }

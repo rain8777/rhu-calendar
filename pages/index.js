@@ -740,8 +740,6 @@ export default function Home() {
           .sheet-wrap .empty { display: none !important; }
         }
       `}</style>
-        }
-      `}</style>
     </>
   );
 }

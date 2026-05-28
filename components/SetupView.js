@@ -43,6 +43,9 @@ export default function SetupView({ theme }) {
         td.val { color: ${dk ? "#e2e8f0" : "#1a202c"}; word-break: break-all; }
         code { background: ${dk ? "#0d1117" : "#f0f4f8"}; padding: 2px 6px; border-radius: 4px; color: #4f8ef7; font-size: 0.82rem; }
         ol { color: ${dk ? "#8892b0" : "#718096"}; font-size: 0.88rem; line-height: 1.9; padding-left: 20px; margin: 0; }
+
+        @media (max-width: 768px) { .wrap { padding: 16px; padding-bottom: 64px; } }
+        @media print { .wrap { display: none !important; } }
       `}</style>
     </div>
   );

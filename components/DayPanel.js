@@ -69,6 +69,13 @@ export default function DayPanel({ date, events, onEdit, onAdd, onClose, theme, 
         .panel-footer { padding: 12px 20px; border-top: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; }
         .btn-add { width: 100%; background: #4f8ef7; color: #fff; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
         .btn-add:hover { background: #3a7de0; }
+
+        @media (max-width: 768px) {
+          .panel-header { padding: 16px 16px 12px; }
+          .panel-body { padding: 12px 16px; }
+        }
+
+        @media print { .panel { display: none !important; } }
       `}</style>
     </div>
   );

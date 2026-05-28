@@ -30,3 +30,8 @@ body.dark ::-webkit-scrollbar-thumb { background: #2d3354; }
 a { color: inherit; text-decoration: none; }
 button { font-family: inherit; }
 input, select, textarea { font-family: inherit; }
+
+@media print {
+  body { background: white !important; color: #1a202c !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

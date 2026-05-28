@@ -106,6 +106,14 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         .btn-danger { background: transparent; color: #e53e3e; border: 1px solid #e53e3e; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-right: auto; }
         .btn-danger:hover { background: rgba(229,62,62,0.08); }
         button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        @media (max-width: 768px) {
+          .box { padding: 20px; width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; border-radius: 0; overflow-y: auto; display: flex; flex-direction: column; }
+          .overlay { align-items: flex-end; }
+          .actions { margin-top: auto; padding-top: 12px; }
+        }
+
+        @media print { .overlay { display: none !important; } }
       `}</style>
     </div>
   );

@@ -244,6 +244,19 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           padding: 4px 12px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; white-space: nowrap;
         }
         .btn-edit:hover { background: rgba(79,142,247,0.1); }
+
+        @media (max-width: 768px) {
+          .sheet-wrap { padding: 12px; padding-bottom: 64px; }
+          .toolbar { flex-direction: column; align-items: stretch; }
+          .toolbar h2 { font-size: 1rem; }
+          .filter-bar { flex-direction: column; padding: 10px 12px; }
+          .filter-group { min-width: 100%; }
+          .table-wrap { overflow-x: auto; }
+          .sheet-table { min-width: 560px; }
+          .sheet-table td, .sheet-table th { padding: 8px 10px; font-size: 0.8rem; }
+        }
+
+        @media print { .sheet-wrap { display: none !important; } }
       `}</style>
     </div>
   );

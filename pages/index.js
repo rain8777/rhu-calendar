@@ -5,7 +5,7 @@ import DayPanel from "../components/DayPanel";
 import SheetView from "../components/SheetView";
 import SetupView from "../components/SetupView";
 import { PROGRAMS, getTeamColor, getTeamName, MONTHS, DAYS_OF_WEEK } from "../lib/constants";
-import { CalendarIcon, ListIcon, SettingsIcon, HospitalIcon, VaccineIcon, HeartIcon, FamilyIcon, TransportIcon, MedicalIcon, SunIcon, MoonIcon, RefreshIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon, CloseIcon } from "../components/Icons";
+import { CalendarIcon, ListIcon, SettingsIcon, HospitalIcon, VaccineIcon, HeartIcon, FamilyIcon, TransportIcon, MedicalIcon, SunIcon, MoonIcon, RefreshIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon, CloseIcon, MenuIcon } from "../components/Icons";
 
 const POLL_INTERVAL = 30000;
 
@@ -52,6 +52,7 @@ export default function Home() {
   const [modal, setModal]         = useState(null);
   const [theme, setTheme]         = useState("light");
   const [lastRefresh, setLastRefresh] = useState({});
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pollRef = useRef(null);
 
   useEffect(() => { document.body.className = theme; }, [theme]);
@@ -160,6 +161,11 @@ export default function Home() {
     ? `Updated ${lastRef.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
     : "";
 
+  const NAV_ITEMS = [
+    { id: "calendar", label: "Calendar", icon: <CalendarIcon size={16} />, mobIcon: <CalendarIcon size={20} /> },
+    { id: "list",     label: "List View", icon: <ListIcon size={16} />, mobIcon: <ListIcon size={20} /> },
+  ];
+
   function programIcon(name) {
     switch (name) {
       case "hospital":     return <HospitalIcon size={18} />;
@@ -180,7 +186,7 @@ export default function Home() {
 
       <div className="app-shell">
         {/* Sidebar */}
-        <aside className="sidebar">
+        <aside className={`sidebar ${mobileMenuOpen ? 'sidebar-open' : ''}`}>
           <div className="brand">
             <span className="brand-icon"><MedicalIcon size={26} /></span>
             <div>
@@ -189,15 +195,11 @@ export default function Home() {
           </div>
 
           <nav className="nav">
-            {[
-              { id: "calendar", label: "Calendar", icon: <CalendarIcon size={16} /> },
-              { id: "list",     label: "List View", icon: <ListIcon size={16} /> },
-              { id: "setup",    label: "Setup", icon: <SettingsIcon size={16} /> },
-            ].map((item) => (
+            {NAV_ITEMS.map((item) => (
               <button
                 key={item.id}
                 className={`nav-btn ${tab === item.id ? "active" : ""}`}
-                onClick={() => setTab(item.id)}
+                onClick={() => { setTab(item.id); setMobileMenuOpen(false); }}
               >
                 <span className="nav-btn-icon">{item.icon}</span>
                 <span>{item.label}</span>
@@ -228,9 +230,19 @@ export default function Home() {
             ))}
           </div>
         </aside>
+        {mobileMenuOpen && <div className="sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} />}
 
         {/* Main */}
         <main className="main-area">
+          {/* Mobile header */}
+          <div className="mob-header">
+            <button className="btn-menu-mobile" onClick={() => setMobileMenuOpen(true)} aria-label="Menu">
+              <MenuIcon size={20} />
+            </button>
+            <span className="mob-header-title">RHU Calendar</span>
+            <div className="mob-header-spacer" />
+          </div>
+
           {/* ── Program Tabs ── */}
           <div className="program-tabs-bar">
             {PROGRAMS.map((p) => (
@@ -252,12 +264,13 @@ export default function Home() {
                 <div className="cal-header">
                   <button className="nav-arrow" onClick={prevMonth}><ChevronLeftIcon size={18} /></button>
                   <h1 className="cal-title">{MONTHS[month]} {year}</h1>
+                  <span className="print-program">{program.label}</span>
                   <button className="nav-arrow" onClick={nextMonth}><ChevronRightIcon size={18} /></button>
                   <button className="btn-today" onClick={() => { setYear(today.getFullYear()); setMonth(today.getMonth()); }}>
                     Today
                   </button>
                   <button className="btn-refresh" onClick={() => loadEvents(false)} title={refreshLabel}>
-                    <RefreshIcon size={12} /> {refreshLabel}
+                    <RefreshIcon size={12} /> <span className="btn-refresh-label">{refreshLabel}</span>
                   </button>
                   <button className="btn-add-top" onClick={() => setModal({ event: null, defaultDate: todayStr })}>
                     + Add
@@ -347,6 +360,20 @@ export default function Home() {
           )}
 
           {tab === "setup" && <SetupView theme={theme} />}
+
+          {/* Bottom nav — mobile only */}
+          <nav className="bottom-nav">
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                className={`bottom-nav-btn ${tab === item.id ? "bottom-nav-active" : ""}`}
+                onClick={() => setTab(item.id)}
+              >
+                {item.mobIcon}
+                <span className="bottom-nav-label">{item.label}</span>
+              </button>
+            ))}
+          </nav>
         </main>
       </div>
 
@@ -428,6 +455,9 @@ export default function Home() {
 
         /* ── Main area ── */
         .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: ${dk ? "#0d1117" : "#f0f4f8"}; transition: background 0.2s; }
+
+        /* Mobile header — hidden on desktop */
+        .mob-header { display: none; }
 
         /* ── Program tabs bar ── */
         .program-tabs-bar {
@@ -543,12 +573,155 @@ export default function Home() {
           overflow-y: auto;
         }
 
+        /* ── Bottom nav — mobile only ── */
+        .bottom-nav { display: none; }
+
+        /* ── Mobile responsive ── */
         @media (max-width: 768px) {
-          .sidebar { display: none; }
-          .side-panel { width: 100%; position: fixed; bottom: 0; left: 0; right: 0; height: 50vh; z-index: 200; border-top: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; }
-          .grid-cell { min-height: 60px; }
+          .sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0; z-index: 300;
+            width: 260px; transform: translateX(-100%);
+            transition: transform 0.25s ease;
+            border-right: 1px solid ${dk ? "#2d3354" : "#e2e8f0"};
+            box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+          }
+          .sidebar.sidebar-open { transform: translateX(0); }
+
+          .sidebar-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+            z-index: 299;
+          }
+
+          .side-panel {
+            width: 100%; position: fixed; bottom: 0; left: 0; right: 0;
+            height: 55vh; z-index: 200;
+            border-top: 1px solid ${dk ? "#2d3354" : "#e2e8f0"};
+            border-left: none; border-radius: 12px 12px 0 0;
+          }
+
+          .mob-header {
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 12px;
+            background: ${dk ? "#131929" : "#ffffff"};
+            border-bottom: 1px solid ${dk ? "#2d3354" : "#e2e8f0"};
+            flex-shrink: 0;
+          }
+          .btn-menu-mobile {
+            background: none; border: none; cursor: pointer;
+            display: flex; align-items: center; padding: 4px;
+            color: ${dk ? "#8892b0" : "#4a5568"};
+          }
+          .mob-header-title {
+            font-size: 0.85rem; font-weight: 600;
+            color: ${dk ? "#e2e8f0" : "#1a202c"};
+          }
+          .mob-header-spacer { flex: 1; }
+
+          .cal-pane { padding: 12px 10px; padding-bottom: 64px; }
+          .cal-header { gap: 6px; }
+          .cal-title { font-size: 1.05rem; }
+          .btn-refresh-label { display: none; }
+          .grid-cell { min-height: 52px; padding: 4px 5px; }
+          .day-num { font-size: 0.72rem; margin-bottom: 2px; }
+          .day-pill { font-size: 0.6rem; padding: 1px 3px; }
+          .day-events { gap: 1px; }
+
           .prog-tab-label { display: none; }
-          .prog-tab { padding: 8px 10px 10px; }
+          .prog-tab { padding: 6px 10px 8px; }
+          .prog-tab-icon svg { width: 16px; height: 16px; }
+
+          .bottom-nav {
+            display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+            height: 54px; z-index: 150;
+            background: ${dk ? "#131929" : "#ffffff"};
+            border-top: 1px solid ${dk ? "#2d3354" : "#e2e8f0"};
+            justify-content: space-around; align-items: center;
+          }
+          .bottom-nav-btn {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            background: none; border: none; cursor: pointer;
+            color: ${dk ? "#4a5568" : "#a0aec0"}; padding: 4px 10px;
+            font-size: 0.65rem; transition: color 0.15s;
+          }
+          .bottom-nav-btn.bottom-nav-active { color: #4f8ef7; }
+          .bottom-nav-label { white-space: nowrap; }
+        }
+
+        /* ── Print styles: A4 with 0.5in margins ── */
+        .print-program { display: none; }
+
+        @media print {
+          @page { size: A4; margin: 0.5in; }
+
+          html, body { height: auto; overflow: visible; background: white; }
+          body.dark, body.light { background: white; color: #1a202c; }
+          #__next { height: auto; }
+
+          .app-shell { display: block; height: auto; overflow: visible; }
+          .sidebar,
+          .sidebar-backdrop,
+          .side-panel,
+          .mob-header,
+          .bottom-nav,
+          .program-tabs-bar,
+          .theme-row,
+          .legend,
+          .info-bar,
+          .btn-today,
+          .btn-refresh,
+          .btn-add-top,
+          .nav-arrow { display: none !important; }
+
+          .main-area {
+            overflow: visible; background: white;
+            display: block; height: auto;
+          }
+          .cal-layout { display: block; overflow: visible; }
+          .cal-pane { padding: 0; overflow: visible; }
+          .cal-header { margin-bottom: 10px; flex-wrap: nowrap; justify-content: center; gap: 6px; }
+          .cal-header button { display: none !important; }
+          .cal-title {
+            font-size: 1rem; color: #1a202c; flex: none;
+            text-align: center; width: auto;
+          }
+          .print-program {
+            display: inline; font-size: 0.85rem; font-weight: 600;
+            color: #4f8ef7; margin-left: 8px;
+          }
+
+          .dow-row { margin-bottom: 2px; border-bottom: 2px solid #e2e8f0; }
+          .dow-cell { font-size: 0.65rem; padding: 4px 0; color: #718096; }
+
+          .grid {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            gap: 1px; overflow: visible;
+            page-break-inside: avoid;
+          }
+          .grid-cell {
+            min-height: 70px; padding: 4px 5px;
+            background: white !important;
+            border: 1px solid #e8edf5 !important;
+            border-radius: 2px; break-inside: avoid;
+          }
+          .grid-cell.empty { background: transparent !important; border-color: transparent !important; }
+          .grid-cell.today { border-color: #4f8ef7 !important; background: #f7f9fc !important; }
+          .grid-cell.selected { border-color: #a5b4fc !important; background: white !important; }
+          .day-num { font-size: 0.7rem; color: #a0aec0; }
+
+          .day-events { gap: 1px; }
+          .day-pill {
+            font-size: 0.55rem; padding: 1px 3px;
+            border-radius: 2px; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          .more-pill { font-size: 0.55rem; color: #a0aec0; }
+
+          .sheet-wrap,
+          .wrap { display: none !important; }
+
+          ::-webkit-scrollbar { display: none; }
         }
       `}</style>
     </>

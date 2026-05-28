@@ -4,8 +4,12 @@ import { SearchIcon, CloseIcon, RefreshIcon } from "./Icons";
 
 export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle }) {
   const dk = theme === "dark";
+  const showPrintTitle = ["RHU Activities", "Transportation Service", "Family Planning"].includes(eventTitle);
 
+  const today = new Date();
   const [filterDate,     setFilterDate]     = useState("");
+  const [filterYear,     setFilterYear]     = useState("");
+  const [filterMonth,    setFilterMonth]    = useState("");
   const [filterActivity, setFilterActivity] = useState("");
   const [filterBarangay, setFilterBarangay] = useState("");
   const [filterDetails,  setFilterDetails]  = useState("");
@@ -14,22 +18,29 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
     return [...events]
       .filter((ev) => {
         if (filterDate && ev.date !== filterDate) return false;
+        if (filterYear && ev.date.slice(0,4) !== filterYear) return false;
+        if (filterMonth && ev.date.slice(5,7) !== filterMonth) return false;
         if (filterActivity && !ev.venue?.toLowerCase().includes(filterActivity.toLowerCase())) return false;
         if (filterBarangay && ev.team !== filterBarangay) return false;
         if (filterDetails && !ev.details?.toLowerCase().includes(filterDetails.toLowerCase())) return false;
         return true;
       })
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [events, filterDate, filterActivity, filterBarangay, filterDetails]);
+  }, [events, filterDate, filterYear, filterMonth, filterActivity, filterBarangay, filterDetails]);
 
-  const hasFilters = filterDate || filterActivity || filterBarangay || filterDetails;
+  const hasFilters = filterDate || filterYear || filterMonth || filterActivity || filterBarangay || filterDetails;
 
   function clearFilters() {
     setFilterDate("");
+    setFilterYear("");
+    setFilterMonth("");
     setFilterActivity("");
     setFilterBarangay("");
     setFilterDetails("");
   }
+
+  const years = [];
+  for (let y = today.getFullYear() - 2; y <= today.getFullYear() + 2; y++) years.push(y);
 
   function fmtDate(dateStr) {
     if (!dateStr) return "—";
@@ -58,6 +69,26 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
             onChange={(e) => setFilterDate(e.target.value)}
             className="filter-input"
           />
+        </div>
+
+        <div className="filter-group">
+          <label>Year</label>
+          <select value={filterYear} onChange={(e) => setFilterYear(e.target.value)} className="filter-input">
+            <option value="">All Years</option>
+            {years.map((y) => (
+              <option key={y} value={String(y)}>{y}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="filter-group">
+          <label>Month</label>
+          <select value={filterMonth} onChange={(e) => setFilterMonth(e.target.value)} className="filter-input">
+            <option value="">All Months</option>
+            {["01","02","03","04","05","06","07","08","09","10","11","12"].map((m) => (
+              <option key={m} value={m}>{new Date(2000, +m-1).toLocaleString("default", { month: "long" })}</option>
+            ))}
+          </select>
         </div>
 
         <div className="filter-group">
@@ -131,11 +162,11 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         </div>
       ) : (
         <div className="table-wrap">
+          {showPrintTitle && <div className="print-title">{eventTitle}</div>}
           <table className="sheet-table">
             <thead>
               <tr>
                 <th>Date</th>
-                <th>Title</th>
                 <th>{teams.length > 0 ? "Barangay" : "Activity"}</th>
                 <th>{teams.length > 0 ? "Details" : "Venue"}</th>
                 <th></th>
@@ -145,7 +176,6 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
               {filtered.map((ev) => (
                 <tr key={ev.id}>
                   <td className="date-cell">{fmtDate(ev.date)}</td>
-                  <td className="title-cell">{eventTitle}</td>
                   <td>
                     {ev.venue ? (
                       <span
@@ -280,6 +310,8 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         }
         .btn-edit:hover { background: rgba(79,142,247,0.1); }
 
+        .print-title { display: none; }
+
         @media (max-width: 768px) {
           .sheet-wrap { padding: 12px; padding-bottom: 64px; }
           .toolbar { flex-direction: column; align-items: stretch; }
@@ -293,6 +325,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
 
         @media print {
           @page { size: A4 portrait; margin: 0.5in; }
+          .print-title { display: block; text-align: center; font-size: 1.2rem; font-weight: 700; color: #1a202c; margin-bottom: 16px; padding-top: 8px; }
         }
       `}</style>
     </div>

@@ -734,9 +734,9 @@ export default function Home() {
           .sheet-wrap .sheet-table td { border-color: #e2e8f0; }
           .sheet-wrap .sheet-table tr:last-child td { border-bottom: 1px solid #e2e8f0; }
           .sheet-wrap .date-cell { color: #4a6cf7; }
-          .sheet-wrap .title-cell { color: #5a67d8; }
           .sheet-wrap .details-cell { color: #718096; }
           .sheet-wrap .team-badge { border: 1px solid; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+          .sheet-wrap .print-title { display: block; text-align: center; font-size: 1.2rem; font-weight: 700; color: #1a202c; margin-bottom: 16px; padding-top: 8px; }
           .sheet-wrap .empty { display: none !important; }
         }
       `}</style>

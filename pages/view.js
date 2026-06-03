@@ -46,12 +46,13 @@ export default function View() {
     setLoadError("");
     try {
       const evs = await apiGet(programId);
-      setEventsByProgram((prev) => ({ ...prev, [programId]: evs }));
+      const filtered = evs.filter((e) => e.title === program.title);
+      setEventsByProgram((prev) => ({ ...prev, [programId]: filtered }));
       setLastRefresh((prev) => ({ ...prev, [programId]: new Date() }));
     } catch (e) {
       setLoadError(e.message);
     } finally { if (showLoader) setLoading(false); }
-  }, [programId]);
+  }, [programId, program.title]);
 
   useEffect(() => { loadEvents(); const id = setInterval(() => loadEvents(false), POLL_INTERVAL); return () => clearInterval(id); }, [loadEvents]);
 

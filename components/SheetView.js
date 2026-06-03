@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { getTeamColor, getTeamName } from "../lib/constants";
 import { SearchIcon, CloseIcon, RefreshIcon } from "./Icons";
 
-export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle }) {
+export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle, readOnly }) {
   const dk = theme === "dark";
   const showPrintTitle = ["RHU Activities", "Transportation Service", "Family Planning"].includes(eventTitle);
 
@@ -51,13 +51,15 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
   return (
     <div className="sheet-wrap">
       {/* Toolbar */}
-      <div className="toolbar">
-        <h2>All Schedules</h2>
-        <div className="toolbar-right">
-          <button className="btn-refresh" onClick={onRefresh} title={refreshLabel}><RefreshIcon size={12} /> {refreshLabel}</button>
-          <button className="btn-add" onClick={() => onAdd(null)}>+ Add Schedule</button>
+        <div className="toolbar">
+          {!readOnly && <h2>All Schedules</h2>}
+          <div className="toolbar-right">
+            {!readOnly && (
+              <button className="btn-refresh" onClick={onRefresh} title={refreshLabel}><RefreshIcon size={12} /> {refreshLabel}</button>
+            )}
+            {!readOnly && <button className="btn-add" onClick={() => onAdd(null)}>+ Add Schedule</button>}
+          </div>
         </div>
-      </div>
 
       {/* Filter bar */}
       <div className="filter-bar">
@@ -169,7 +171,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                 <th>Date</th>
                 <th>{teams.length > 0 ? "Barangay" : "Activity"}</th>
                 <th>{teams.length > 0 ? "Details" : "Venue"}</th>
-                <th></th>
+                {!readOnly && <th></th>}
               </tr>
             </thead>
             <tbody>
@@ -208,9 +210,11 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                       ev.details || <span className="dash">—</span>
                     )}
                   </td>
+                  {!readOnly && (
                   <td>
                     <button className="btn-edit" onClick={() => onEdit(ev)}>Edit</button>
                   </td>
+                  )}
                 </tr>
               ))}
             </tbody>

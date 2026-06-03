@@ -1,7 +1,7 @@
 import { getTeamColor, getTeamName } from "../lib/constants";
 import { CloseIcon } from "./Icons";
 
-export default function DayPanel({ date, events, onEdit, onAdd, onClose, theme, teams, eventTitle }) {
+export default function DayPanel({ date, events, onEdit, onAdd, onClose, theme, teams, eventTitle, readOnly }) {
   const dk = theme === "dark";
 
   const label = date
@@ -34,7 +34,7 @@ export default function DayPanel({ date, events, onEdit, onAdd, onClose, theme, 
               key={ev.id}
               className="event-card"
               style={{ borderLeftColor: cardColor }}
-              onClick={() => onEdit(ev)}
+              onClick={() => !readOnly && onEdit(ev)}
             >
               <div className="ev-title">{eventTitle}</div>
               <div className="ev-team">{ev.venue || getTeamName(ev.team, teams)}</div>
@@ -45,9 +45,11 @@ export default function DayPanel({ date, events, onEdit, onAdd, onClose, theme, 
         )}
       </div>
 
-      <div className="panel-footer">
-        <button className="btn-add" onClick={() => onAdd(date)}>+ Add Schedule</button>
-      </div>
+      {!readOnly && (
+        <div className="panel-footer">
+          <button className="btn-add" onClick={() => onAdd(date)}>+ Add Schedule</button>
+        </div>
+      )}
 
       <style jsx>{`
         .panel { height: 100%; display: flex; flex-direction: column; background: ${dk ? "#131929" : "#ffffff"}; }

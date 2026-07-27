@@ -728,6 +728,7 @@ export default function Home() {
           .sheet-wrap .filter-bar,
           .sheet-wrap .btn-edit,
           .sheet-wrap .btn-print,
+          .sheet-wrap .btn-export,
           .sheet-wrap .results-info { display: none !important; }
           .sheet-wrap .table-wrap { overflow: visible; border: none; border-radius: 0; }
           .sheet-wrap .sheet-table { min-width: auto; }

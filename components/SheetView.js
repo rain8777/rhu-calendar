@@ -1,10 +1,22 @@
 import { useState, useMemo } from "react";
 import { getTeamColor, getTeamName } from "../lib/constants";
-import { SearchIcon, CloseIcon, RefreshIcon, PrinterIcon } from "./Icons";
+import { SearchIcon, CloseIcon, RefreshIcon, PrinterIcon, DownloadIcon } from "./Icons";
 
 export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle, readOnly, programId }) {
   const dk = theme === "dark";
   const showPrintTitle = ["RHU Activities", "Transportation Service", "Family Planning"].includes(eventTitle);
+
+  const PRINT_TITLES = {
+    purokalusugan: "PuroKalusugan",
+    nip: "LIGTAS TIGDAS",
+    philhealth: "Philhealth Yakap",
+    ncd: "VIA and CBE",
+    familyplanning: "Family Planning",
+    mnao: "MNAO",
+    rhuactivities: "RHU ACTIVITIES",
+    transportation: "TRANSPORTATION",
+  };
+  const printTitle = PRINT_TITLES[programId] || eventTitle;
 
   const today = new Date();
   const [filterDateFrom, setFilterDateFrom] = useState("");
@@ -53,26 +65,24 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
 
   return (
     <div className="sheet-wrap">
-      {programId === "nip" && (
-        <div className="print-header">
-          <div className="print-header-row">
-            <div className="print-logos-left">
-              <img src="/Logo/LGU.png" alt="LGU" className="print-logo" />
-              <img src="/Logo/RHU.png" alt="RHU" className="print-logo" />
-            </div>
-            <div className="print-header-center">
-              <div className="print-gov-text">Republic of the Philippines</div>
-              <div className="print-gov-text">Province of Camarines Sur</div>
-              <div className="print-gov-text">Municipality of Ragay</div>
-              <div className="print-main-title">LIGTAS TIGDAS</div>
-            </div>
-            <div className="print-logos-right">
-              <img src="/Logo/NIP.png" alt="NIP" className="print-logo" />
-              <img src="/Logo/Bagong_pilipinas.png" alt="Bagong Pilipinas" className="print-logo" />
-            </div>
+      <div className="print-header">
+        <div className="print-header-row">
+          <div className="print-logos-left">
+            <img src="/Logo/LGU.png" alt="LGU" className="print-logo" />
+            <img src="/Logo/RHU.png" alt="RHU" className="print-logo" />
+          </div>
+          <div className="print-header-center">
+            <div className="print-gov-text">Republic of the Philippines</div>
+            <div className="print-gov-text">Province of Camarines Sur</div>
+            <div className="print-gov-text">Municipality of Ragay</div>
+            <div className="print-main-title">{printTitle}</div>
+          </div>
+          <div className="print-logos-right">
+            {programId === "nip" && <img src="/Logo/NIP.png" alt="NIP" className="print-logo" />}
+            <img src="/Logo/Bagong_pilipinas.png" alt="Bagong Pilipinas" className="print-logo" />
           </div>
         </div>
-      )}
+      </div>
 
       {/* Toolbar */}
         <div className="toolbar">
@@ -80,6 +90,11 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           <div className="toolbar-right">
             {!readOnly && (
               <button className="btn-refresh" onClick={onRefresh} title={refreshLabel}><RefreshIcon size={12} /> {refreshLabel}</button>
+            )}
+            {programId === "nip" && (
+              <button className="btn-export" onClick={() => window.print()}>
+                <DownloadIcon size={14} /> Export to PDF
+              </button>
             )}
             <button className="btn-print" onClick={() => window.print()}>
               <PrinterIcon size={14} /> Print
@@ -387,6 +402,13 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         }
         .btn-print:hover { border-color: #4f8ef7; color: #4f8ef7; }
 
+        .btn-export {
+          display: flex; align-items: center; gap: 4px;
+          background: #4f8ef7; color: #fff; border: none;
+          padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600; white-space: nowrap;
+        }
+        .btn-export:hover { background: #3a7de0; }
+
         @media (max-width: 768px) {
           .sheet-wrap { padding: 12px; padding-bottom: 64px; }
           .toolbar { flex-direction: column; align-items: stretch; }
@@ -402,6 +424,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           @page { size: A4 portrait; margin: 0.5in; }
           .print-title { display: block; text-align: center; font-size: 1.2rem; font-weight: 700; color: #1a202c; margin-bottom: 16px; padding-top: 8px; }
           .btn-print { display: none !important; }
+          .btn-export { display: none !important; }
           .print-header {
             display: flex !important;
             align-items: center;

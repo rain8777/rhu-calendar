@@ -1,17 +1,14 @@
 import { useState, useMemo } from "react";
 import { getTeamColor, getTeamName } from "../lib/constants";
 import { SearchIcon, CloseIcon, RefreshIcon, PrinterIcon } from "./Icons";
-import lguLogo from '../Logo/LGU.png';
-import rhuLogo from '../Logo/RHU.png';
-import nipLogo from '../Logo/NIP.png';
-import bagongPilipinasLogo from '../Logo/Bagong_pilipinas.png';
 
 export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle, readOnly, programId }) {
   const dk = theme === "dark";
   const showPrintTitle = ["RHU Activities", "Transportation Service", "Family Planning"].includes(eventTitle);
 
   const today = new Date();
-  const [filterDate,     setFilterDate]     = useState("");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo,   setFilterDateTo]   = useState("");
   const [filterYear,     setFilterYear]     = useState("");
   const [filterMonth,    setFilterMonth]    = useState("");
   const [filterActivity, setFilterActivity] = useState("");
@@ -21,7 +18,8 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
   const filtered = useMemo(() => {
     return [...events]
       .filter((ev) => {
-        if (filterDate && ev.date !== filterDate) return false;
+        if (filterDateFrom && ev.date < filterDateFrom) return false;
+        if (filterDateTo && ev.date > filterDateTo) return false;
         if (filterYear && ev.date.slice(0,4) !== filterYear) return false;
         if (filterMonth && ev.date.slice(5,7) !== filterMonth) return false;
         if (filterActivity && !ev.venue?.toLowerCase().includes(filterActivity.toLowerCase())) return false;
@@ -30,12 +28,13 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         return true;
       })
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [events, filterDate, filterYear, filterMonth, filterActivity, filterBarangay, filterDetails]);
+  }, [events, filterDateFrom, filterDateTo, filterYear, filterMonth, filterActivity, filterBarangay, filterDetails]);
 
-  const hasFilters = filterDate || filterYear || filterMonth || filterActivity || filterBarangay || filterDetails;
+  const hasFilters = filterDateFrom || filterDateTo || filterYear || filterMonth || filterActivity || filterBarangay || filterDetails;
 
   function clearFilters() {
-    setFilterDate("");
+    setFilterDateFrom("");
+    setFilterDateTo("");
     setFilterYear("");
     setFilterMonth("");
     setFilterActivity("");
@@ -58,8 +57,8 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         <div className="print-header">
           <div className="print-header-row">
             <div className="print-logos-left">
-              <img src={lguLogo} alt="LGU" className="print-logo" />
-              <img src={rhuLogo} alt="RHU" className="print-logo" />
+              <img src="/Logo/LGU.png" alt="LGU" className="print-logo" />
+              <img src="/Logo/RHU.png" alt="RHU" className="print-logo" />
             </div>
             <div className="print-header-center">
               <div className="print-gov-text">Republic of the Philippines</div>
@@ -68,8 +67,8 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
               <div className="print-main-title">LIGTAS TIGDAS</div>
             </div>
             <div className="print-logos-right">
-              <img src={nipLogo} alt="NIP" className="print-logo" />
-              <img src={bagongPilipinasLogo} alt="Bagong Pilipinas" className="print-logo" />
+              <img src="/Logo/NIP.png" alt="NIP" className="print-logo" />
+              <img src="/Logo/Bagong_pilipinas.png" alt="Bagong Pilipinas" className="print-logo" />
             </div>
           </div>
         </div>
@@ -92,11 +91,21 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
       {/* Filter bar */}
       <div className="filter-bar">
         <div className="filter-group">
-          <label>Date</label>
+          <label>From</label>
           <input
             type="date"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
+            value={filterDateFrom}
+            onChange={(e) => setFilterDateFrom(e.target.value)}
+            className="filter-input"
+          />
+        </div>
+
+        <div className="filter-group">
+          <label>To</label>
+          <input
+            type="date"
+            value={filterDateTo}
+            onChange={(e) => setFilterDateTo(e.target.value)}
             className="filter-input"
           />
         </div>
@@ -216,14 +225,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                   {programId === "nip" ? (
                     <>
                       <td>
-                        <span
-                          className="team-badge"
-                          style={{
-                            background:  getTeamColor(ev.team) + "22",
-                            color:       getTeamColor(ev.team),
-                            borderColor: getTeamColor(ev.team),
-                          }}
-                        >
+                        <span className="nip-barangay">
                           {getTeamName(ev.team, teams)}
                         </span>
                       </td>
@@ -363,6 +365,11 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           display: inline-block; padding: 3px 10px; border-radius: 20px;
           font-size: 0.78rem; font-weight: 600; border: 1px solid; white-space: nowrap;
         }
+        .nip-barangay {
+          display: inline-block; padding: 3px 10px; border-radius: 20px;
+          font-size: 0.78rem; font-weight: 600; border: 1px solid; white-space: nowrap;
+          background: ${dk ? "#1a204022" : "#f0f4f8"}; color: ${dk ? "#e2e8f0" : "#2d3748"};
+        }
         .btn-edit {
           background: transparent; color: #4f8ef7; border: 1px solid #4f8ef7;
           padding: 4px 12px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; white-space: nowrap;
@@ -422,6 +429,11 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
             margin-top: 6px; letter-spacing: 0.12em; text-transform: uppercase;
             border-top: 1px solid #cbd5e0; border-bottom: 1px solid #cbd5e0;
             padding: 4px 0; display: inline-block;
+          }
+          .nip-barangay {
+            display: inline; padding: 0; border: none; border-radius: 0;
+            background: none !important; color: #1a202c !important;
+            font-size: 0.875rem; font-weight: 500;
           }
           .activity-cell { color: #4a5568; font-weight: 500; }
         }

@@ -211,7 +211,7 @@ export default function View() {
                         <div className="day-events">
                           {dayEvents.slice(0, 3).map((ev) => {
                             const pillColor = ev.color || getTeamColor(ev.team);
-                            const pillLabel = ev.venue || getTeamName(ev.team, program.teams);
+                            const pillLabel = programId === "nip" ? getTeamName(ev.team, program.teams) : (ev.venue || getTeamName(ev.team, program.teams));
                             return (
                             <div key={ev.id} className="day-pill" style={{ background: pillColor + "28", color: pillColor, borderColor: pillColor }} title={pillLabel}>
                               {pillLabel}
@@ -255,6 +255,7 @@ export default function View() {
               teams={program.teams}
               eventTitle={program.title}
               readOnly
+              programId={programId}
             />
           )}
 
@@ -393,7 +394,7 @@ export default function View() {
           .day-pill { font-size: 0.55rem; padding: 1px 3px; border-radius: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
           .more-pill { font-size: 0.55rem; color: #a0aec0; }
           .sheet-wrap { display: block !important; height: auto; overflow: visible; padding: 0; }
-          .sheet-wrap .toolbar, .sheet-wrap .filter-bar, .sheet-wrap .btn-edit, .sheet-wrap .results-info { display: none !important; }
+          .sheet-wrap .toolbar, .sheet-wrap .filter-bar, .sheet-wrap .btn-edit, .sheet-wrap .btn-print, .sheet-wrap .results-info { display: none !important; }
           .sheet-wrap .table-wrap { overflow: visible; border: none; border-radius: 0; }
           .sheet-wrap .sheet-table { min-width: auto; }
           .sheet-wrap .sheet-table th, .sheet-wrap .sheet-table td { padding: 6px 10px; font-size: 0.75rem; color: #1a202c; }

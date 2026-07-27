@@ -333,7 +333,7 @@ export default function Home() {
                         <div className="day-events">
                           {dayEvents.slice(0, 3).map((ev) => {
                             const pillColor = ev.color || getTeamColor(ev.team);
-                            const pillLabel = ev.venue || getTeamName(ev.team, program.teams);
+                            const pillLabel = programId === "nip" ? getTeamName(ev.team, program.teams) : (ev.venue || getTeamName(ev.team, program.teams));
                             return (
                             <div
                               key={ev.id}
@@ -387,6 +387,7 @@ export default function Home() {
               refreshLabel={refreshLabel}
               teams={program.teams}
               eventTitle={program.title}
+              programId={programId}
             />
           )}
 
@@ -726,6 +727,7 @@ export default function Home() {
           .sheet-wrap .toolbar,
           .sheet-wrap .filter-bar,
           .sheet-wrap .btn-edit,
+          .sheet-wrap .btn-print,
           .sheet-wrap .results-info { display: none !important; }
           .sheet-wrap .table-wrap { overflow: visible; border: none; border-radius: 0; }
           .sheet-wrap .sheet-table { min-width: auto; }

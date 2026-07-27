@@ -1,8 +1,12 @@
 import { useState, useMemo } from "react";
 import { getTeamColor, getTeamName } from "../lib/constants";
-import { SearchIcon, CloseIcon, RefreshIcon } from "./Icons";
+import { SearchIcon, CloseIcon, RefreshIcon, PrinterIcon } from "./Icons";
+import lguLogo from '../Logo/LGU.png';
+import rhuLogo from '../Logo/RHU.png';
+import nipLogo from '../Logo/NIP.png';
+import bagongPilipinasLogo from '../Logo/Bagong_pilipinas.png';
 
-export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle, readOnly }) {
+export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle, readOnly, programId }) {
   const dk = theme === "dark";
   const showPrintTitle = ["RHU Activities", "Transportation Service", "Family Planning"].includes(eventTitle);
 
@@ -50,6 +54,27 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
 
   return (
     <div className="sheet-wrap">
+      {programId === "nip" && (
+        <div className="print-header">
+          <div className="print-header-row">
+            <div className="print-logos-left">
+              <img src={lguLogo} alt="LGU" className="print-logo" />
+              <img src={rhuLogo} alt="RHU" className="print-logo" />
+            </div>
+            <div className="print-header-center">
+              <div className="print-gov-text">Republic of the Philippines</div>
+              <div className="print-gov-text">Province of Camarines Sur</div>
+              <div className="print-gov-text">Municipality of Ragay</div>
+              <div className="print-main-title">LIGTAS TIGDAS</div>
+            </div>
+            <div className="print-logos-right">
+              <img src={nipLogo} alt="NIP" className="print-logo" />
+              <img src={bagongPilipinasLogo} alt="Bagong Pilipinas" className="print-logo" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Toolbar */}
         <div className="toolbar">
           {!readOnly && <h2>All Schedules</h2>}
@@ -57,6 +82,9 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
             {!readOnly && (
               <button className="btn-refresh" onClick={onRefresh} title={refreshLabel}><RefreshIcon size={12} /> {refreshLabel}</button>
             )}
+            <button className="btn-print" onClick={() => window.print()}>
+              <PrinterIcon size={14} /> Print
+            </button>
             {!readOnly && <button className="btn-add" onClick={() => onAdd(null)}>+ Add Schedule</button>}
           </div>
         </div>
@@ -169,7 +197,14 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
             <thead>
               <tr>
                 <th>Date</th>
-                <th>{teams.length > 0 ? "Barangay" : "Activity"}</th>
+                {programId === "nip" ? (
+                  <>
+                    <th>Barangay</th>
+                    <th>Activity Name</th>
+                  </>
+                ) : (
+                  <th>{teams.length > 0 ? "Barangay" : "Activity"}</th>
+                )}
                 <th>{teams.length > 0 ? "Details" : "Venue"}</th>
                 {!readOnly && <th></th>}
               </tr>
@@ -178,31 +213,51 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
               {filtered.map((ev) => (
                 <tr key={ev.id}>
                   <td className="date-cell">{fmtDate(ev.date)}</td>
-                  <td>
-                    {ev.venue ? (
-                      <span
-                        className="team-badge"
-                        style={{
-                          background:  (ev.color || getTeamColor(ev.team)) + "22",
-                          color:       ev.color || getTeamColor(ev.team),
-                          borderColor: ev.color || getTeamColor(ev.team),
-                        }}
-                      >
-                        {ev.venue}
-                      </span>
-                    ) : (
-                      <span
-                        className="team-badge"
-                        style={{
-                          background:  getTeamColor(ev.team) + "22",
-                          color:       getTeamColor(ev.team),
-                          borderColor: getTeamColor(ev.team),
-                        }}
-                      >
-                        {getTeamName(ev.team, teams)}
-                      </span>
-                    )}
-                  </td>
+                  {programId === "nip" ? (
+                    <>
+                      <td>
+                        <span
+                          className="team-badge"
+                          style={{
+                            background:  getTeamColor(ev.team) + "22",
+                            color:       getTeamColor(ev.team),
+                            borderColor: getTeamColor(ev.team),
+                          }}
+                        >
+                          {getTeamName(ev.team, teams)}
+                        </span>
+                      </td>
+                      <td className="activity-cell">
+                        {ev.venue || <span className="dash">—</span>}
+                      </td>
+                    </>
+                  ) : (
+                    <td>
+                      {ev.venue ? (
+                        <span
+                          className="team-badge"
+                          style={{
+                            background:  (ev.color || getTeamColor(ev.team)) + "22",
+                            color:       ev.color || getTeamColor(ev.team),
+                            borderColor: ev.color || getTeamColor(ev.team),
+                          }}
+                        >
+                          {ev.venue}
+                        </span>
+                      ) : (
+                        <span
+                          className="team-badge"
+                          style={{
+                            background:  getTeamColor(ev.team) + "22",
+                            color:       getTeamColor(ev.team),
+                            borderColor: getTeamColor(ev.team),
+                          }}
+                        >
+                          {getTeamName(ev.team, teams)}
+                        </span>
+                      )}
+                    </td>
+                  )}
                   <td className="details-cell">
                     {filterDetails && ev.details ? (
                       <HighlightText text={ev.details} query={filterDetails} />
@@ -315,6 +370,15 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         .btn-edit:hover { background: rgba(79,142,247,0.1); }
 
         .print-title { display: none; }
+        .print-header { display: none; }
+
+        .btn-print {
+          display: flex; align-items: center; gap: 4px;
+          background: transparent; border: 1px solid ${dk ? "#2d3354" : "#d1d9e6"};
+          color: ${dk ? "#8892b0" : "#718096"};
+          padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; white-space: nowrap;
+        }
+        .btn-print:hover { border-color: #4f8ef7; color: #4f8ef7; }
 
         @media (max-width: 768px) {
           .sheet-wrap { padding: 12px; padding-bottom: 64px; }
@@ -330,6 +394,36 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         @media print {
           @page { size: A4 portrait; margin: 0.5in; }
           .print-title { display: block; text-align: center; font-size: 1.2rem; font-weight: 700; color: #1a202c; margin-bottom: 16px; padding-top: 8px; }
+          .btn-print { display: none !important; }
+          .print-header {
+            display: flex !important;
+            align-items: center;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #1a202c;
+          }
+          .print-header-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            justify-content: space-between;
+          }
+          .print-logos-left, .print-logos-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+          }
+          .print-logo { height: 48px; width: auto; object-fit: contain; }
+          .print-header-center { text-align: center; flex: 1; padding: 0 16px; }
+          .print-gov-text { font-size: 0.7rem; color: #1a202c; line-height: 1.5; font-weight: 500; }
+          .print-main-title {
+            font-size: 1.3rem; font-weight: 800; color: #1a202c;
+            margin-top: 6px; letter-spacing: 0.12em; text-transform: uppercase;
+            border-top: 1px solid #cbd5e0; border-bottom: 1px solid #cbd5e0;
+            padding: 4px 0; display: inline-block;
+          }
+          .activity-cell { color: #4a5568; font-weight: 500; }
         }
       `}</style>
     </div>

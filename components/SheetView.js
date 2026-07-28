@@ -63,6 +63,22 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
     return `${m}/${d}/${y}`;
   }
 
+  function parseVenue(details) {
+    if (details && details.startsWith("Venue: ")) {
+      const i = details.indexOf("\n");
+      return i > -1 ? details.slice(7, i) : details.slice(7);
+    }
+    return "";
+  }
+
+  function cleanDetails(details) {
+    if (details && details.startsWith("Venue: ")) {
+      const i = details.indexOf("\n");
+      return i > -1 ? details.slice(i + 1) : "";
+    }
+    return details;
+  }
+
   return (
     <div className="sheet-wrap">
       <div className="print-header">
@@ -225,6 +241,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                   <>
                     <th>Barangay</th>
                     <th>Activity Name</th>
+                    <th>Venue</th>
                   </>
                 ) : (
                   <th>{teams.length > 0 ? "Barangay" : "Activity"}</th>
@@ -246,6 +263,9 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                       </td>
                       <td className="activity-cell">
                         {ev.venue || <span className="dash">—</span>}
+                      </td>
+                      <td className="venue-cell">
+                        {parseVenue(ev.details) || <span className="dash">—</span>}
                       </td>
                     </>
                   ) : (
@@ -276,10 +296,18 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                     </td>
                   )}
                   <td className="details-cell">
-                    {filterDetails && ev.details ? (
-                      <HighlightText text={ev.details} query={filterDetails} />
+                    {programId === "nip" ? (
+                      filterDetails && cleanDetails(ev.details) ? (
+                        <HighlightText text={cleanDetails(ev.details)} query={filterDetails} />
+                      ) : (
+                        cleanDetails(ev.details) || <span className="dash">—</span>
+                      )
                     ) : (
-                      ev.details || <span className="dash">—</span>
+                      filterDetails && ev.details ? (
+                        <HighlightText text={ev.details} query={filterDetails} />
+                      ) : (
+                        ev.details || <span className="dash">—</span>
+                      )
                     )}
                   </td>
                   {!readOnly && (
@@ -374,6 +402,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         .date-cell { white-space: nowrap; color: ${dk ? "#a5b4fc" : "#4a6cf7"}; font-weight: 500; }
         .title-cell { color: ${dk ? "#a5b4fc" : "#5a67d8"}; font-weight: 500; }
         .details-cell { color: ${dk ? "#8892b0" : "#718096"}; max-width: 260px; }
+        .venue-cell { color: ${dk ? "#a5b4fc" : "#5a67d8"}; font-weight: 500; }
         .dash { color: ${dk ? "#4a5568" : "#cbd5e0"}; }
 
         .team-badge {
@@ -459,6 +488,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
             font-size: 0.875rem; font-weight: 500;
           }
           .activity-cell { color: #4a5568; font-weight: 500; }
+          .venue-cell { color: #5a67d8; font-weight: 500; }
         }
       `}</style>
     </div>

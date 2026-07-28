@@ -420,6 +420,7 @@ export default function Home() {
           teams={program.teams}
           eventTitle={program.title}
           programType={program.type}
+          programId={programId}
         />
       )}
 

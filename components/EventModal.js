@@ -2,7 +2,7 @@ import { useState } from "react";
 import { getTeamColor } from "../lib/constants";
 import { CloseIcon } from "./Icons";
 
-export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType }) {
+export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType, programId }) {
   const dk = theme === "dark";
   const isActivity = programType === "activity";
   const activityRequired = eventTitle === "Family Planning";
@@ -10,7 +10,8 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
   const [team,    setTeam]    = useState(event?.team    || defaultTeam);
 
   const rawDetails = event?.details || "";
-  const parsed = isActivity && rawDetails.startsWith("Venue: ")
+  const shouldParseVenue = isActivity || programId === "nip";
+  const parsed = shouldParseVenue && rawDetails.startsWith("Venue: ")
     ? (() => { const i = rawDetails.indexOf("\n"); return i > -1 ? [rawDetails.slice(7, i), rawDetails.slice(i+1)] : [rawDetails.slice(7), ""]; })()
     : [null, rawDetails];
 
@@ -27,7 +28,7 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
     if (!date) { setError("Date is required."); return; }
     if (activityRequired && !venue.trim()) { setError("Activity Name is required."); return; }
     setSaving(true); setError("");
-    const finalDetails = isActivity && venueLocation
+    const finalDetails = (isActivity || programId === "nip") && venueLocation
       ? "Venue: " + venueLocation + "\n" + details
       : details;
     try {
@@ -79,15 +80,23 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
             </div>
           </>
         ) : (
-          <div className="field">
-            <label>Barangay</label>
-            <select value={team} onChange={(e) => setTeam(e.target.value)}>
-              {teams.map((t) => (
-                <option key={t.id} value={t.id}>{t.name}</option>
-              ))}
-            </select>
-            <div className="color-bar" style={{ background: getTeamColor(team) }} />
-          </div>
+          <>
+            <div className="field">
+              <label>Barangay</label>
+              <select value={team} onChange={(e) => setTeam(e.target.value)}>
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+              <div className="color-bar" style={{ background: getTeamColor(team) }} />
+            </div>
+            {programId === "nip" && (
+              <div className="field">
+                <label>Venue (optional)</label>
+                <input type="text" value={venueLocation} onChange={(e) => setVenueLocation(e.target.value)} placeholder="e.g. RHU Main Office, Barangay Hall" />
+              </div>
+            )}
+          </>
         )}
 
         <div className="field">

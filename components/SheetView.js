@@ -490,6 +490,20 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           .activity-cell { color: #4a5568; font-weight: 500; }
           .venue-cell { color: #5a67d8; font-weight: 500; }
         }
+
+        ${programId === "nip" ? `
+        @media print {
+          .sheet-table th,
+          .sheet-table td { border-color: #1a202c !important; }
+          .sheet-table th { background: #e8ecf0 !important; color: #1a202c !important; }
+          .date-cell { color: #1a202c !important; }
+          .details-cell { color: #1a202c !important; }
+          .activity-cell { color: #1a202c !important; font-weight: 600 !important; }
+          .venue-cell { color: #1a202c !important; font-weight: 600 !important; }
+          .nip-barangay { color: #1a202c !important; font-weight: 600 !important; }
+          .dash { color: #4a5568 !important; }
+        }
+        ` : ""}
       `}</style>
     </div>
   );

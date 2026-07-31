@@ -30,10 +30,11 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
   const filtered = useMemo(() => {
     return [...events]
       .filter((ev) => {
-        if (filterDateFrom && ev.date < filterDateFrom) return false;
-        if (filterDateTo && ev.date > filterDateTo) return false;
-        if (filterYear && ev.date.slice(0,4) !== filterYear) return false;
-        if (filterMonth && ev.date.slice(5,7) !== filterMonth) return false;
+        const evDate = ev.date ? ev.date.slice(0, 10) : "";
+        if (filterDateFrom && evDate < filterDateFrom) return false;
+        if (filterDateTo && evDate > filterDateTo) return false;
+        if (filterYear && evDate.slice(0,4) !== filterYear) return false;
+        if (filterMonth && evDate.slice(5,7) !== filterMonth) return false;
         if (filterActivity && !ev.venue?.toLowerCase().includes(filterActivity.toLowerCase())) return false;
         if (filterBarangay && ev.team !== filterBarangay) return false;
         if (filterDetails && !ev.details?.toLowerCase().includes(filterDetails.toLowerCase())) return false;
@@ -323,7 +324,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
       )}
 
       <style jsx>{`
-        .sheet-wrap { padding: 24px; height: 100%; display: flex; flex-direction: column; }
+        .sheet-wrap { padding: 24px; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
         .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
         .toolbar h2 { margin: 0; color: ${dk ? "#e2e8f0" : "#1a202c"}; font-size: 1.2rem; }

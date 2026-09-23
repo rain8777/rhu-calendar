@@ -4,6 +4,8 @@ import EventModal from "../components/EventModal";
 import DayPanel from "../components/DayPanel";
 import SheetView from "../components/SheetView";
 import SetupView from "../components/SetupView";
+import SignaturePanel from "../components/SignaturePanel";
+import SignaturePrint from "../components/SignaturePrint";
 import { PROGRAMS, getTeamColor, getTeamName, MONTHS, DAYS_OF_WEEK } from "../lib/constants";
 import { CalendarIcon, ListIcon, SettingsIcon, HospitalIcon, VaccineIcon, HeartIcon, FamilyIcon, TransportIcon, MedicalIcon, ShieldIcon, LeafIcon, SunIcon, MoonIcon, RefreshIcon, ChevronLeftIcon, ChevronRightIcon, SearchIcon, CloseIcon, MenuIcon, ActivityIcon } from "../components/Icons";
 
@@ -53,9 +55,21 @@ export default function Home() {
   const [theme, setTheme]         = useState("light");
   const [lastRefresh, setLastRefresh] = useState({});
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sigConfig, setSigConfig] = useState([]);
   const pollRef = useRef(null);
 
   useEffect(() => { document.body.className = theme; }, [theme]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("rhu-calendar-signatures");
+      if (raw) setSigConfig(JSON.parse(raw));
+    } catch (e) { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem("rhu-calendar-signatures", JSON.stringify(sigConfig)); } catch (e) { /* ignore */ }
+  }, [sigConfig]);
 
   const loadEvents = useCallback(async (silent = false, pid = null) => {
     const targetId = pid || programId;
@@ -287,7 +301,7 @@ export default function Home() {
 
           {tab === "calendar" && (
             <div className="cal-layout">
-              <div className="cal-pane">
+              <div className={`cal-pane${sigConfig.length ? " has-sig" : ""}`}>
                 <div className="cal-header">
                   <button className="nav-arrow" onClick={prevMonth}><ChevronLeftIcon size={18} /></button>
                   <h1 className="cal-title">{MONTHS[month]} {year}</h1>
@@ -299,6 +313,7 @@ export default function Home() {
                   <button className="btn-refresh" onClick={() => loadEvents(false)} title={refreshLabel}>
                     <RefreshIcon size={12} /> <span className="btn-refresh-label">{refreshLabel}</span>
                   </button>
+                  <SignaturePanel config={sigConfig} onChange={setSigConfig} theme={theme} />
                   <button className="btn-add-top" onClick={() => setModal({ event: null, defaultDate: todayStr })}>
                     + Add
                   </button>
@@ -374,6 +389,8 @@ export default function Home() {
                     );
                   })}
                 </div>
+
+                <SignaturePrint config={sigConfig} />
               </div>
 
               {selectedDate && (
@@ -768,6 +785,7 @@ export default function Home() {
             height: calc(100vh - 165px);
             grid-template-rows: repeat(6, 1fr); gap: 2px; overflow: hidden;
           }
+          .cal-pane.has-sig .grid { height: calc(100vh - 285px); }
           .grid-cell {
             padding: 4px 6px; border-radius: 2px;
             background: white !important; border: 1px solid #cbd5e0 !important;

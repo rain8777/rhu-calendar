@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Head from "next/head";
 import DayPanel from "../components/DayPanel";
 import SheetView from "../components/SheetView";
+import SignaturePanel from "../components/SignaturePanel";
+import SignaturePrint from "../components/SignaturePrint";
 import { PROGRAMS, getTeamColor, getTeamName, MONTHS, DAYS_OF_WEEK } from "../lib/constants";
 import { CalendarIcon, ListIcon, HospitalIcon, VaccineIcon, HeartIcon, FamilyIcon, TransportIcon, MedicalIcon, ShieldIcon, LeafIcon, SunIcon, MoonIcon, RefreshIcon, ChevronLeftIcon, ChevronRightIcon, MenuIcon, ActivityIcon } from "../components/Icons";
 
@@ -34,6 +36,7 @@ export default function View() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [lastRefresh, setLastRefresh] = useState({});
+  const [sigConfig, setSigConfig] = useState([]);
   const lastRef = lastRefresh[programId];
   const refreshLabel = lastRef
     ? `Updated ${lastRef.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
@@ -55,6 +58,17 @@ export default function View() {
   }, [programId, program.title]);
 
   useEffect(() => { loadEvents(); const id = setInterval(() => loadEvents(false), POLL_INTERVAL); return () => clearInterval(id); }, [loadEvents]);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("rhu-calendar-signatures");
+      if (raw) setSigConfig(JSON.parse(raw));
+    } catch (e) { /* ignore */ }
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem("rhu-calendar-signatures", JSON.stringify(sigConfig)); } catch (e) { /* ignore */ }
+  }, [sigConfig]);
 
   const totalDays = daysInMonth(year, month);
   const startDay  = firstDayOfMonth(year, month);
@@ -186,7 +200,7 @@ export default function View() {
 
           {tab === "calendar" && (
             <div className="cal-layout">
-              <div className="cal-pane">
+              <div className={`cal-pane${sigConfig.length ? " has-sig" : ""}`}>
                 <div className="cal-header">
                   <button className="nav-arrow" onClick={() => { if (month === 0) { setYear(y => y - 1); setMonth(11); } else setMonth(m => m - 1); setSelectedDate(null); }}><ChevronLeftIcon size={18} /></button>
                   <h1 className="cal-title">{MONTHS[month]} {year}</h1>
@@ -194,6 +208,7 @@ export default function View() {
                   <button className="nav-arrow" onClick={() => { if (month === 11) { setYear(y => y + 1); setMonth(0); } else setMonth(m => m + 1); setSelectedDate(null); }}><ChevronRightIcon size={18} /></button>
                   <button className="btn-today" onClick={() => { setYear(today.getFullYear()); setMonth(today.getMonth()); }}>Today</button>
                   <button className="btn-refresh" onClick={() => loadEvents(false)} title={refreshLabel}><RefreshIcon size={12} /> <span className="btn-refresh-label">{refreshLabel}</span></button>
+                  <SignaturePanel config={sigConfig} onChange={setSigConfig} theme={theme} />
                 </div>
 
                 <div className="print-cal-header">
@@ -242,6 +257,8 @@ export default function View() {
                     );
                   })}
                 </div>
+
+                <SignaturePrint config={sigConfig} />
               </div>
 
               {selectedDate && (
@@ -429,6 +446,7 @@ export default function View() {
             height: calc(100vh - 165px);
             grid-template-rows: repeat(6, 1fr); gap: 2px; overflow: hidden;
           }
+          .cal-pane.has-sig .grid { height: calc(100vh - 285px); }
           .grid-cell { padding: 4px 6px; border-radius: 2px; background: white !important; border: 1px solid #cbd5e0 !important; }
           .grid-cell.empty { background: transparent !important; border-color: transparent !important; }
           .grid-cell.today { border-color: #4f8ef7 !important; background: #f7f9fc !important; box-shadow: none; }

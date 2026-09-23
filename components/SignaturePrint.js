@@ -1,6 +1,8 @@
 const LABELS = { noted: "Noted by", prepared: "Prepared by", approved: "Approved by" };
 
 export default function SignaturePrint({ config = [] }) {
+  if (!config || config.length === 0) return null;
+
   return (
     <div className="sig-print">
       {[0, 1, 2].map((i) => {

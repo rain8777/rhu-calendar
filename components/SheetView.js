@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
 import { getTeamColor, getTeamName } from "../lib/constants";
 import { SearchIcon, CloseIcon, RefreshIcon, PrinterIcon, DownloadIcon } from "./Icons";
+import SignaturePanel from "./SignaturePanel";
+import SignaturePrint from "./SignaturePrint";
 
-export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle, readOnly, programId }) {
+export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle, readOnly, programId, sigConfig, onSigChange }) {
   const dk = theme === "dark";
   const showPrintTitle = ["RHU Activities", "Transportation Service", "Family Planning"].includes(eventTitle);
 
@@ -116,6 +118,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
             <button className="btn-print" onClick={() => window.print()}>
               <PrinterIcon size={14} /> Print
             </button>
+            <SignaturePanel config={sigConfig} onChange={onSigChange} theme={theme} />
             {!readOnly && <button className="btn-add" onClick={() => onAdd(null)}>+ Add Schedule</button>}
           </div>
         </div>
@@ -322,6 +325,8 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           </table>
         </div>
       )}
+
+      <SignaturePrint config={sigConfig} />
 
       <style jsx>{`
         .sheet-wrap { padding: 24px; flex: 1; min-height: 0; display: flex; flex-direction: column; }

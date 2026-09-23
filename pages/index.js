@@ -598,7 +598,10 @@ export default function Home() {
         .dow-row { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; margin-bottom: 6px; }
         .dow-cell { text-align: center; padding: 8px 0 6px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: ${dk ? "#8892b0" : "#718096"}; }
 
-        .grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 4px; flex: 1; overflow: hidden; }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, minmax(min-content, 1fr)); gap: 4px; flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: rgba(120,130,160,0.35) transparent; }
+        .grid::-webkit-scrollbar { width: 8px; }
+        .grid::-webkit-scrollbar-thumb { background: rgba(120,130,160,0.35); border-radius: 8px; }
+        .grid::-webkit-scrollbar-track { background: transparent; }
         .grid-cell {
           display: flex; flex-direction: column;
           padding: 5px 6px; min-width: 0;
@@ -621,13 +624,7 @@ export default function Home() {
         .grid-cell.today .day-num { background: #4f8ef7; color: #fff; font-weight: 700; }
         .grid-cell.selected .day-num { color: #4f8ef7; }
 
-        .day-events {
-          display: flex; flex-direction: column; gap: 3px;
-          flex: 1; min-height: 0; overflow-y: auto;
-          scrollbar-width: thin; scrollbar-color: rgba(120,130,160,0.35) transparent;
-        }
-        .day-events::-webkit-scrollbar { width: 4px; }
-        .day-events::-webkit-scrollbar-thumb { background: rgba(120,130,160,0.35); border-radius: 4px; }
+        .day-events { display: flex; flex-direction: column; gap: 3px; }
         .day-pill {
           font-size: 0.68rem; font-weight: 600; padding: 3px 7px; border-radius: 6px;
           border: 1px solid; max-width: 100%; cursor: pointer; white-space: normal;

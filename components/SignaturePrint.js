@@ -25,7 +25,7 @@ export default function SignaturePrint({ config = [] }) {
         @media print {
           .sig-print {
             display: flex; justify-content: space-between; gap: 48px; align-items: flex-start;
-            padding: 0 24px 0; page-break-inside: avoid;
+            padding: 32px 24px 0; page-break-inside: avoid;
           }
           .sig-block { flex: 1; text-align: left; }
           .sig-label { font-size: 0.78rem; font-weight: 700; color: #1a202c; margin-bottom: 58px; }

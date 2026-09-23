@@ -196,7 +196,26 @@ export default function View() {
                   <button className="btn-refresh" onClick={() => loadEvents(false)} title={refreshLabel}><RefreshIcon size={12} /> <span className="btn-refresh-label">{refreshLabel}</span></button>
                 </div>
 
-                <div className="dow-row">{DAYS_OF_WEEK.map((d) => <div key={d} className="dow-cell">{d}</div>)}</div>
+                <div className="print-cal-header">
+                    <div className="print-cal-row">
+                      <div className="print-cal-logos print-cal-left">
+                        <img src="/Logo/LGU.png" alt="LGU" className="print-logo" />
+                        <img src="/Logo/RHU.png" alt="RHU" className="print-logo" />
+                      </div>
+                      <div className="print-cal-center">
+                        <div className="print-gov-text">Republic of the Philippines</div>
+                        <div className="print-gov-text">Province of Camarines Sur</div>
+                        <div className="print-gov-text">Municipality of Ragay</div>
+                        <div className="print-cal-main">{program.label} — {MONTHS[month]} {year}</div>
+                      </div>
+                      <div className="print-cal-logos print-cal-right">
+                        {programId === "nip" && <img src="/Logo/NIP.png" alt="NIP" className="print-logo" />}
+                        <img src="/Logo/Bagong_pilipinas.png" alt="Bagong Pilipinas" className="print-logo" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="dow-row">{DAYS_OF_WEEK.map((d) => <div key={d} className="dow-cell">{d}</div>)}</div>
 
                 <div className="grid">
                   {cells.map((day, i) => {
@@ -318,18 +337,19 @@ export default function View() {
         .error-retry { background: transparent; border: 1px solid #fc8181; color: #fc8181; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
         .sidebar-backdrop { display: none; }
 
-        .dow-row { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; margin-bottom: 4px; }
-        .dow-cell { text-align: center; padding: 6px 0; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.07em; color: ${dk ? "#8892b0" : "#a0aec0"}; }
-        .grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 3px; flex: 1; overflow: hidden; }
-        .grid-cell { padding: 3px 4px; min-width: 0; background: white !important; border: 1px solid #e8edf5 !important; border-radius: 2px; break-inside: avoid; cursor: pointer; }
+        .dow-row { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; margin-bottom: 6px; }
+        .dow-cell { text-align: center; padding: 8px 0 6px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: ${dk ? "#8892b0" : "#718096"}; }
+        .grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 4px; flex: 1; overflow: hidden; }
+        .grid-cell { padding: 5px 6px; min-width: 0; background: ${dk ? "#131929" : "#ffffff"} !important; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"} !important; border-radius: 8px; break-inside: avoid; cursor: pointer; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s; }
         .grid-cell.empty { background: transparent; border-color: transparent; cursor: default; }
-        .grid-cell:not(.empty):hover { background: ${dk ? "#1a2040" : "#f7f9fc"}; border-color: ${dk ? "#2d3354" : "#c8d6e8"}; }
-        .grid-cell.today { border-color: #4f8ef7; background: ${dk ? "#0f1d38" : "#ebf4ff"}; }
-        .grid-cell.selected { border-color: #a5b4fc; background: ${dk ? "#1a2040" : "#f0f0ff"}; }
-        .day-num { font-size: 0.8rem; font-weight: 600; color: ${dk ? "#8892b0" : "#a0aec0"}; margin-bottom: 4px; }
-        .grid-cell.today .day-num { color: #4f8ef7; font-weight: 700; }
-        .day-events { display: flex; flex-direction: column; gap: 2px; }
-        .day-pill { font-size: 0.67rem; font-weight: 600; padding: 2px 5px; border-radius: 4px; border: 1px solid; max-width: 100%; cursor: default; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+        .grid-cell:not(.empty):hover { background: ${dk ? "#1a2040" : "#f7f9fc"} !important; border-color: ${dk ? "#2d3354" : "#c8d6e8"} !important; }
+        .grid-cell.today { border-color: #4f8ef7; background: ${dk ? "#0f1d38" : "#ebf4ff"} !important; box-shadow: inset 0 0 0 1px #4f8ef7; }
+        .grid-cell.selected { border-color: #a5b4fc; background: ${dk ? "#1a2040" : "#f0f0ff"} !important; box-shadow: inset 0 0 0 1px #a5b4fc; }
+        .day-num { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; font-size: 0.82rem; font-weight: 600; color: ${dk ? "#8892b0" : "#718096"}; margin-bottom: 5px; }
+        .grid-cell.today .day-num { background: #4f8ef7; color: #fff; font-weight: 700; }
+        .grid-cell.selected .day-num { color: #4f8ef7; }
+        .day-events { display: flex; flex-direction: column; gap: 3px; }
+        .day-pill { font-size: 0.68rem; font-weight: 600; padding: 3px 7px; border-radius: 6px; border: 1px solid; max-width: 100%; cursor: default; white-space: normal; overflow-wrap: anywhere; word-break: break-word; line-height: 1.35; }
         .more-pill { font-size: 0.65rem; color: ${dk ? "#8892b0" : "#a0aec0"}; padding: 1px 4px; }
 
         .side-panel { width: 300px; flex-shrink: 0; border-left: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; background: ${dk ? "#131929" : "#ffffff"}; overflow-y: auto; }
@@ -361,9 +381,9 @@ export default function View() {
           .cal-title { font-size: 1.05rem; }
           .btn-refresh-label { display: none; }
           .grid-cell { padding: 4px 5px; min-width: 0; }
-          .day-num { font-size: 0.72rem; margin-bottom: 2px; }
-          .day-pill { font-size: 0.6rem; padding: 1px 3px; max-width: 100%; }
-          .day-events { gap: 1px; }
+          .day-num { font-size: 0.72rem; width: 20px; height: 20px; margin-bottom: 3px; }
+          .day-pill { font-size: 0.6rem; padding: 2px 4px; max-width: 100%; }
+          .day-events { gap: 2px; }
           .prog-tab { padding: 6px 8px 8px; gap: 1px; }
           .prog-tab-label { font-size: 0.62rem; display: block; }
           .prog-tab-icon svg { width: 16px; height: 16px; }
@@ -374,24 +394,48 @@ export default function View() {
         }
 
         .print-program { display: none; }
+        .print-cal-header { display: none; }
         @media print {
-          @page { size: A4 landscape; margin: 0.5in; }
+          @page { size: 8.5in 13in landscape; margin: 0.35in; }
           html, body { height: auto; overflow: visible; background: white; }
           body.dark, body.light { background: white; color: #1a202c; }
           #__next { height: auto; }
           .app-shell { display: block; height: auto; overflow: visible; }
-          .sidebar, .sidebar-backdrop, .side-panel, .mob-header, .bottom-nav, .program-tabs-bar, .theme-row, .legend, .btn-today, .btn-refresh, .nav-arrow { display: none !important; }
+          .sidebar, .sidebar-backdrop, .side-panel, .mob-header, .bottom-nav, .program-tabs-bar, .theme-row, .legend, .btn-today, .btn-refresh, .nav-arrow, .cal-header { display: none !important; }
           .main-area { overflow: visible; background: white; display: block; height: auto; }
           .cal-layout { display: block; overflow: visible; }
-          .cal-pane { padding: 0; overflow: visible; }
-          .grid { overflow: visible; }
-          .grid-cell { padding: 3px 4px; min-width: 0; background: white !important; border: 1px solid #e8edf5 !important; border-radius: 2px; break-inside: avoid; }
+          .cal-pane { padding: 0; overflow: hidden; }
+
+          .print-cal-header { display: block; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid #1a202c; }
+          .print-cal-row { display: flex; align-items: center; width: 100%; justify-content: space-between; }
+          .print-cal-logos { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+          .print-logo { height: 54px; width: auto; object-fit: contain; }
+          .print-cal-center { text-align: center; flex: 1; padding: 0 16px; }
+          .print-gov-text { font-size: 0.66rem; color: #1a202c; line-height: 1.45; font-weight: 500; }
+          .print-cal-main {
+            font-size: 1.3rem; font-weight: 800; color: #1a202c;
+            margin-top: 5px; letter-spacing: 0.1em; text-transform: uppercase;
+            border-top: 1px solid #cbd5e0; border-bottom: 1px solid #cbd5e0;
+            padding: 4px 0; display: inline-block;
+          }
+
+          .dow-row { border-bottom: 2px solid #1a202c; margin-bottom: 3px; }
+          .dow-cell { color: #4a5568; padding: 5px 0; font-size: 0.68rem; }
+
+          .grid {
+            height: calc(100vh - 165px);
+            grid-template-rows: repeat(6, 1fr); gap: 2px; overflow: hidden;
+          }
+          .grid-cell { padding: 4px 6px; border-radius: 2px; background: white !important; border: 1px solid #cbd5e0 !important; }
           .grid-cell.empty { background: transparent !important; border-color: transparent !important; }
-          .grid-cell.today { border-color: #4f8ef7 !important; background: #f7f9fc !important; }
-          .day-num { font-size: 0.7rem; color: #a0aec0; }
-          .day-events { gap: 1px; }
-          .day-pill { font-size: 0.55rem; padding: 1px 3px; border-radius: 2px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-          .more-pill { font-size: 0.55rem; color: #a0aec0; }
+          .grid-cell.today { border-color: #4f8ef7 !important; background: #f7f9fc !important; box-shadow: none; }
+          .grid-cell.selected { border-color: #a5b4fc !important; background: white !important; box-shadow: none; }
+          .day-num { display: inline; width: auto; height: auto; border-radius: 0; background: none; padding: 0; font-size: 0.72rem; font-weight: 600; color: #4a5568; }
+          .grid-cell.today .day-num { background: none; color: #1a202c; font-weight: 800; }
+          .grid-cell.selected .day-num { color: #4a5568; }
+          .day-events { gap: 2px; }
+          .day-pill { font-size: 0.6rem; padding: 2px 5px; border-radius: 3px; line-height: 1.3; white-space: normal; overflow-wrap: anywhere; word-break: break-word; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+
           .sheet-wrap { display: block !important; height: auto; overflow: visible; padding: 0; }
           .sheet-wrap .toolbar, .sheet-wrap .filter-bar, .sheet-wrap .btn-edit, .sheet-wrap .btn-print, .sheet-wrap .btn-export, .sheet-wrap .results-info { display: none !important; }
           .sheet-wrap .table-wrap { overflow: visible; border: none; border-radius: 0; }

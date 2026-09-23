@@ -785,7 +785,7 @@ export default function Home() {
             height: calc(100vh - 165px);
             grid-template-rows: repeat(6, 1fr); gap: 2px; overflow: hidden;
           }
-          .cal-pane.has-sig .grid { height: calc(100vh - 345px); }
+          .cal-pane.has-sig .grid { height: calc(100vh - 385px); }
           .grid-cell {
             padding: 4px 6px; border-radius: 2px;
             background: white !important; border: 1px solid #cbd5e0 !important;

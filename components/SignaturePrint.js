@@ -28,7 +28,7 @@ export default function SignaturePrint({ config = [] }) {
             padding: 0 24px 0; page-break-inside: avoid;
           }
           .sig-block { flex: 1; text-align: left; }
-          .sig-label { font-size: 0.78rem; font-weight: 700; color: #1a202c; margin-bottom: 22px; }
+          .sig-label { font-size: 0.78rem; font-weight: 700; color: #1a202c; margin-bottom: 34px; }
           .sig-line { border-top: 1.5px solid #1a202c; margin-bottom: 5px; }
           .sig-name { text-align: center; font-size: 0.82rem; font-weight: 600; color: #1a202c; }
           .sig-position { text-align: center; font-size: 0.72rem; color: #4a5568; margin-top: 2px; }

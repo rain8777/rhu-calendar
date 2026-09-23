@@ -446,7 +446,7 @@ export default function View() {
             height: calc(100vh - 165px);
             grid-template-rows: repeat(6, 1fr); gap: 2px; overflow: hidden;
           }
-          .cal-pane.has-sig .grid { height: auto; flex: none; grid-template-rows: repeat(6, minmax(min-content, 1fr)); }
+          .cal-pane.has-sig .grid { height: auto; flex: none; grid-template-rows: repeat(6, auto); }
           .grid-cell { padding: 4px 6px; border-radius: 2px; background: white !important; border: 1px solid #cbd5e0 !important; }
           .grid-cell.empty { background: transparent !important; border-color: transparent !important; }
           .grid-cell.today { border-color: #4f8ef7 !important; background: #f7f9fc !important; box-shadow: none; }

@@ -331,7 +331,7 @@ export default function Home() {
                       >
                         <div className="day-num">{day}</div>
                         <div className="day-events">
-                          {dayEvents.slice(0, 3).map((ev) => {
+                          {dayEvents.map((ev) => {
                             const pillColor = ev.color || getTeamColor(ev.team);
                             const pillLabel = programId === "nip" ? getTeamName(ev.team, program.teams) : (ev.venue || getTeamName(ev.team, program.teams));
                             return (
@@ -350,9 +350,6 @@ export default function Home() {
                             </div>
                             );
                           })}
-                          {dayEvents.length > 3 && (
-                            <div className="more-pill">+{dayEvents.length - 3} more</div>
-                          )}
                         </div>
                       </div>
                     );
@@ -596,10 +593,11 @@ export default function Home() {
         .day-num { font-size: 0.8rem; font-weight: 600; color: ${dk ? "#8892b0" : "#a0aec0"}; margin-bottom: 4px; }
         .grid-cell.today .day-num { color: #4f8ef7; font-weight: 700; }
 
-        .day-events { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+        .day-events { display: flex; flex-direction: column; gap: 2px; }
         .day-pill {
           font-size: 0.67rem; font-weight: 600; padding: 2px 5px; border-radius: 4px;
-          border: 1px solid; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; cursor: pointer;
+          border: 1px solid; max-width: 100%; cursor: pointer; white-space: normal;
+          overflow-wrap: anywhere; word-break: break-word;
         }
         .day-pill:hover { opacity: 0.75; }
         .more-pill { font-size: 0.65rem; color: ${dk ? "#8892b0" : "#a0aec0"}; padding: 1px 4px; }

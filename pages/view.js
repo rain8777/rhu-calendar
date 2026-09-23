@@ -209,7 +209,7 @@ export default function View() {
                       <div key={dateStr} className={`grid-cell${isToday ? " today" : ""}${isSel ? " selected" : ""}`} onClick={() => setSelectedDate(isSel ? null : dateStr)}>
                         <div className="day-num">{day}</div>
                         <div className="day-events">
-                          {dayEvents.slice(0, 3).map((ev) => {
+                        {dayEvents.map((ev) => {
                             const pillColor = ev.color || getTeamColor(ev.team);
                             const pillLabel = programId === "nip" ? getTeamName(ev.team, program.teams) : (ev.venue || getTeamName(ev.team, program.teams));
                             return (
@@ -218,7 +218,6 @@ export default function View() {
                             </div>
                             );
                           })}
-                          {dayEvents.length > 3 && <div className="more-pill">+{dayEvents.length - 3} more</div>}
                         </div>
                       </div>
                     );
@@ -329,8 +328,8 @@ export default function View() {
         .grid-cell.selected { border-color: #a5b4fc; background: ${dk ? "#1a2040" : "#f0f0ff"}; }
         .day-num { font-size: 0.8rem; font-weight: 600; color: ${dk ? "#8892b0" : "#a0aec0"}; margin-bottom: 4px; }
         .grid-cell.today .day-num { color: #4f8ef7; font-weight: 700; }
-        .day-events { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
-        .day-pill { font-size: 0.67rem; font-weight: 600; padding: 2px 5px; border-radius: 4px; border: 1px solid; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; cursor: default; }
+        .day-events { display: flex; flex-direction: column; gap: 2px; }
+        .day-pill { font-size: 0.67rem; font-weight: 600; padding: 2px 5px; border-radius: 4px; border: 1px solid; max-width: 100%; cursor: default; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
         .more-pill { font-size: 0.65rem; color: ${dk ? "#8892b0" : "#a0aec0"}; padding: 1px 4px; }
 
         .side-panel { width: 300px; flex-shrink: 0; border-left: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; background: ${dk ? "#131929" : "#ffffff"}; overflow-y: auto; }
@@ -391,7 +390,7 @@ export default function View() {
           .grid-cell.today { border-color: #4f8ef7 !important; background: #f7f9fc !important; }
           .day-num { font-size: 0.7rem; color: #a0aec0; }
           .day-events { gap: 1px; }
-          .day-pill { font-size: 0.55rem; padding: 1px 3px; border-radius: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+          .day-pill { font-size: 0.55rem; padding: 1px 3px; border-radius: 2px; white-space: normal; overflow-wrap: anywhere; word-break: break-word; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
           .more-pill { font-size: 0.55rem; color: #a0aec0; }
           .sheet-wrap { display: block !important; height: auto; overflow: visible; padding: 0; }
           .sheet-wrap .toolbar, .sheet-wrap .filter-bar, .sheet-wrap .btn-edit, .sheet-wrap .btn-print, .sheet-wrap .btn-export, .sheet-wrap .results-info { display: none !important; }

@@ -600,6 +600,7 @@ export default function Home() {
 
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 4px; flex: 1; overflow: hidden; }
         .grid-cell {
+          display: flex; flex-direction: column;
           padding: 5px 6px; min-width: 0;
           background: ${dk ? "#131929" : "#ffffff"} !important;
           border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"} !important;
@@ -611,6 +612,7 @@ export default function Home() {
         .grid-cell.today { border-color: #4f8ef7; background: ${dk ? "#0f1d38" : "#ebf4ff"} !important; box-shadow: inset 0 0 0 1px #4f8ef7; }
         .grid-cell.selected { border-color: #a5b4fc; background: ${dk ? "#1a2040" : "#f0f0ff"} !important; box-shadow: inset 0 0 0 1px #a5b4fc; }
         .day-num {
+          flex-shrink: 0;
           display: flex; align-items: center; justify-content: center;
           width: 22px; height: 22px; border-radius: 50%;
           font-size: 0.82rem; font-weight: 600;
@@ -619,7 +621,13 @@ export default function Home() {
         .grid-cell.today .day-num { background: #4f8ef7; color: #fff; font-weight: 700; }
         .grid-cell.selected .day-num { color: #4f8ef7; }
 
-        .day-events { display: flex; flex-direction: column; gap: 3px; }
+        .day-events {
+          display: flex; flex-direction: column; gap: 3px;
+          flex: 1; min-height: 0; overflow-y: auto;
+          scrollbar-width: thin; scrollbar-color: rgba(120,130,160,0.35) transparent;
+        }
+        .day-events::-webkit-scrollbar { width: 4px; }
+        .day-events::-webkit-scrollbar-thumb { background: rgba(120,130,160,0.35); border-radius: 4px; }
         .day-pill {
           font-size: 0.68rem; font-weight: 600; padding: 3px 7px; border-radius: 6px;
           border: 1px solid; max-width: 100%; cursor: pointer; white-space: normal;
@@ -780,6 +788,7 @@ export default function Home() {
             font-size: 0.6rem; padding: 2px 5px; border-radius: 3px; line-height: 1.3;
             print-color-adjust: exact; -webkit-print-color-adjust: exact;
           }
+          .day-events { overflow: visible; flex: none; }
 
           ::-webkit-scrollbar { display: none; }
         }

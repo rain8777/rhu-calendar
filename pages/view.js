@@ -340,15 +340,17 @@ export default function View() {
         .dow-row { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; margin-bottom: 6px; }
         .dow-cell { text-align: center; padding: 8px 0 6px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: ${dk ? "#8892b0" : "#718096"}; }
         .grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 4px; flex: 1; overflow: hidden; }
-        .grid-cell { padding: 5px 6px; min-width: 0; background: ${dk ? "#131929" : "#ffffff"} !important; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"} !important; border-radius: 8px; break-inside: avoid; cursor: pointer; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s; }
+        .grid-cell { display: flex; flex-direction: column; padding: 5px 6px; min-width: 0; background: ${dk ? "#131929" : "#ffffff"} !important; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"} !important; border-radius: 8px; break-inside: avoid; cursor: pointer; transition: background 0.15s, border-color 0.15s, box-shadow 0.15s; }
         .grid-cell.empty { background: transparent; border-color: transparent; cursor: default; }
         .grid-cell:not(.empty):hover { background: ${dk ? "#1a2040" : "#f7f9fc"} !important; border-color: ${dk ? "#2d3354" : "#c8d6e8"} !important; }
         .grid-cell.today { border-color: #4f8ef7; background: ${dk ? "#0f1d38" : "#ebf4ff"} !important; box-shadow: inset 0 0 0 1px #4f8ef7; }
         .grid-cell.selected { border-color: #a5b4fc; background: ${dk ? "#1a2040" : "#f0f0ff"} !important; box-shadow: inset 0 0 0 1px #a5b4fc; }
-        .day-num { display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; font-size: 0.82rem; font-weight: 600; color: ${dk ? "#8892b0" : "#718096"}; margin-bottom: 5px; }
+        .day-num { flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; font-size: 0.82rem; font-weight: 600; color: ${dk ? "#8892b0" : "#718096"}; margin-bottom: 5px; }
         .grid-cell.today .day-num { background: #4f8ef7; color: #fff; font-weight: 700; }
         .grid-cell.selected .day-num { color: #4f8ef7; }
-        .day-events { display: flex; flex-direction: column; gap: 3px; }
+        .day-events { display: flex; flex-direction: column; gap: 3px; flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(120,130,160,0.35) transparent; }
+        .day-events::-webkit-scrollbar { width: 4px; }
+        .day-events::-webkit-scrollbar-thumb { background: rgba(120,130,160,0.35); border-radius: 4px; }
         .day-pill { font-size: 0.68rem; font-weight: 600; padding: 3px 7px; border-radius: 6px; border: 1px solid; max-width: 100%; cursor: default; white-space: normal; overflow-wrap: anywhere; word-break: break-word; line-height: 1.35; }
         .more-pill { font-size: 0.65rem; color: ${dk ? "#8892b0" : "#a0aec0"}; padding: 1px 4px; }
 
@@ -433,7 +435,7 @@ export default function View() {
           .day-num { display: inline; width: auto; height: auto; border-radius: 0; background: none; padding: 0; font-size: 0.72rem; font-weight: 600; color: #4a5568; }
           .grid-cell.today .day-num { background: none; color: #1a202c; font-weight: 800; }
           .grid-cell.selected .day-num { color: #4a5568; }
-          .day-events { gap: 2px; }
+          .day-events { gap: 2px; overflow: visible; flex: none; }
           .day-pill { font-size: 0.6rem; padding: 2px 5px; border-radius: 3px; line-height: 1.3; white-space: normal; overflow-wrap: anywhere; word-break: break-word; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 
           .sheet-wrap { display: block !important; height: auto; overflow: visible; padding: 0; }

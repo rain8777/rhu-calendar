@@ -37,11 +37,11 @@ export default function SetupView({ theme }) {
         .status.ok  { background: rgba(72,187,120,0.12); color: ${dk ? "#68d391" : "#276749"}; }
         .status.warn { background: rgba(246,173,85,0.12); color: ${dk ? "#f6ad55" : "#b7791f"}; }
         .card { background: ${dk ? "#131929" : "#ffffff"}; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; }
-        .card h3 { color: #4f8ef7; margin: 0 0 14px; font-size: 1rem; }
+        .card h3 { color: #6161ff; margin: 0 0 14px; font-size: 1rem; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 8px 12px; font-size: 0.85rem; color: ${dk ? "#8892b0" : "#718096"}; vertical-align: top; }
         td.val { color: ${dk ? "#e2e8f0" : "#1a202c"}; word-break: break-all; }
-        code { background: ${dk ? "#0d1117" : "#f0f4f8"}; padding: 2px 6px; border-radius: 4px; color: #4f8ef7; font-size: 0.82rem; }
+        code { background: ${dk ? "#0d1117" : "#f0f4f8"}; padding: 2px 6px; border-radius: 4px; color: #6161ff; font-size: 0.82rem; }
         ol { color: ${dk ? "#8892b0" : "#718096"}; font-size: 0.88rem; line-height: 1.9; padding-left: 20px; margin: 0; }
 
         @media (max-width: 768px) { .wrap { padding: 16px; padding-bottom: 64px; } }

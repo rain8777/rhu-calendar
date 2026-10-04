@@ -93,7 +93,7 @@ export default function SignaturePanel({ config = [], onChange, theme }) {
           color: ${dk ? "#8892b0" : "#718096"};
           padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; white-space: nowrap;
         }
-        .btn-sig:hover { border-color: #4f8ef7; color: #4f8ef7; }
+        .btn-sig:hover { border-color: #6161ff; color: #6161ff; }
 
         .sig-pop {
           position: absolute; top: calc(100% + 6px); right: 0; z-index: 60;
@@ -106,19 +106,19 @@ export default function SignaturePanel({ config = [], onChange, theme }) {
 
         .sig-pop-title {
           font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em;
-          color: #4f8ef7; font-weight: 700; margin-bottom: 8px;
+          color: #6161ff; font-weight: 700; margin-bottom: 8px;
         }
 
         .sig-row { padding: 6px 0; border-bottom: 1px solid ${dk ? "#2d3354" : "#f0f4f8"}; }
         .sig-row:last-of-type { border-bottom: none; }
 
         .sig-check { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: ${dk ? "#e2e8f0" : "#1a202c"}; }
-        .sig-check input { accent-color: #4f8ef7; cursor: pointer; }
+        .sig-check input { accent-color: #6161ff; cursor: pointer; }
         .sig-check-label { font-weight: 500; }
 
         .sig-slot {
-          font-style: normal; font-size: 0.68rem; font-weight: 700; color: #4f8ef7; margin-left: auto;
-          background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.3);
+          font-style: normal; font-size: 0.68rem; font-weight: 700; color: #6161ff; margin-left: auto;
+          background: rgba(97,97,255,0.1); border: 1px solid rgba(97,97,255,0.3);
           border-radius: 4px; padding: 1px 6px;
         }
 
@@ -130,7 +130,7 @@ export default function SignaturePanel({ config = [], onChange, theme }) {
           color: ${dk ? "#e2e8f0" : "#1a202c"};
           border-radius: 6px; padding: 6px 8px; font-size: 0.8rem; outline: none;
         }
-        .sig-input:focus { border-color: #4f8ef7; }
+        .sig-input:focus { border-color: #6161ff; }
         .sig-input::placeholder { color: ${dk ? "#4a5568" : "#a0aec0"}; }
 
         .sig-hint { font-size: 0.7rem; color: ${dk ? "#8892b0" : "#a0aec0"}; margin-top: 8px; line-height: 1.4; }

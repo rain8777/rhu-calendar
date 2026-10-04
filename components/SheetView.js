@@ -336,13 +336,13 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           color: ${dk ? "#8892b0" : "#718096"};
           padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; white-space: nowrap;
         }
-        .btn-refresh:hover { border-color: #4f8ef7; color: #4f8ef7; }
+        .btn-refresh:hover { border-color: #6161ff; color: #6161ff; }
 
         .btn-add {
-          background: #4f8ef7; color: #fff; border: none;
+          background: #6161ff; color: #fff; border: none;
           padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 0.88rem; font-weight: 600;
         }
-        .btn-add:hover { background: #3a7de0; }
+        .btn-add:hover { background: #4d4de6; }
 
         /* Filter bar */
         .filter-bar {
@@ -363,7 +363,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           border-radius: 6px; padding: 7px 10px; font-size: 0.875rem; outline: none;
           width: 100%;
         }
-        .filter-input:focus { border-color: #4f8ef7; }
+        .filter-input:focus { border-color: #6161ff; }
 
         .search-wrap { position: relative; display: flex; align-items: center; }
         .search-icon { position: absolute; left: 8px; display: flex; align-items: center; pointer-events: none; color: ${dk ? "#4a5568" : "#a0aec0"}; }
@@ -416,10 +416,10 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           background: ${dk ? "#1a204022" : "#f0f4f8"}; color: ${dk ? "#e2e8f0" : "#2d3748"};
         }
         .btn-edit {
-          background: transparent; color: #4f8ef7; border: 1px solid #4f8ef7;
+          background: transparent; color: #6161ff; border: 1px solid #6161ff;
           padding: 4px 12px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; white-space: nowrap;
         }
-        .btn-edit:hover { background: rgba(79,142,247,0.1); }
+        .btn-edit:hover { background: rgba(97,97,255,0.1); }
 
         .print-title { display: none; }
         .print-header { display: none; }
@@ -430,14 +430,14 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           color: ${dk ? "#8892b0" : "#718096"};
           padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; white-space: nowrap;
         }
-        .btn-print:hover { border-color: #4f8ef7; color: #4f8ef7; }
+        .btn-print:hover { border-color: #6161ff; color: #6161ff; }
 
         .btn-export {
           display: flex; align-items: center; gap: 4px;
-          background: #4f8ef7; color: #fff; border: none;
+          background: #6161ff; color: #fff; border: none;
           padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.78rem; font-weight: 600; white-space: nowrap;
         }
-        .btn-export:hover { background: #3a7de0; }
+        .btn-export:hover { background: #4d4de6; }
 
         @media (max-width: 768px) {
           .sheet-wrap { padding: 12px; padding-bottom: 64px; }

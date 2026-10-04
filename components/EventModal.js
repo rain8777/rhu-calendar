@@ -17,7 +17,7 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
 
   const [venue,   setVenue]   = useState(event?.venue   || "");
   const [venueLocation, setVenueLocation] = useState(parsed[0] || "");
-  const [color,   setColor]   = useState(event?.color   || "#4f8ef7");
+  const [color,   setColor]   = useState(event?.color   || "#6161ff");
   const [date,    setDate]    = useState(event?.date    || defaultDate || "");
   const [details, setDetails] = useState(parsed[1] || "");
   const [saving,  setSaving]  = useState(false);
@@ -132,23 +132,23 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         .close-btn:hover { color: ${dk ? "#e2e8f0" : "#1a202c"}; }
         .field { margin-bottom: 16px; }
         .field label { display: block; font-size: 0.74rem; color: ${dk ? "#8892b0" : "#718096"}; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; font-weight: 600; }
-        .fixed-title { background: ${dk ? "#131929" : "#f0f4f8"}; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; border-radius: 6px; padding: 8px 12px; color: #4f8ef7; font-weight: 600; font-size: 0.95rem; }
+        .fixed-title { background: ${dk ? "#131929" : "#f0f4f8"}; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; border-radius: 6px; padding: 8px 12px; color: #6161ff; font-weight: 600; font-size: 0.95rem; }
         select, input[type="date"], input[type="text"], textarea {
           width: 100%; background: ${dk ? "#131929" : "#f7fafc"};
           border: 1px solid ${dk ? "#2d3354" : "#d1d9e6"};
           border-radius: 6px; color: ${dk ? "#e2e8f0" : "#1a202c"};
           padding: 8px 12px; font-size: 0.9rem; box-sizing: border-box; outline: none;
         }
-        select:focus, input:focus, textarea:focus { border-color: #4f8ef7; }
+        select:focus, input:focus, textarea:focus { border-color: #6161ff; }
         input[type="text"]::placeholder { color: ${dk ? "#4a5278" : "#a0aec0"}; }
         textarea { resize: vertical; font-family: inherit; }
         .color-bar { height: 3px; border-radius: 2px; margin-top: 6px; transition: background 0.2s; }
         .error-msg { color: #e53e3e; font-size: 0.85rem; margin-bottom: 12px; padding: 8px 12px; background: rgba(229,62,62,0.08); border-radius: 6px; }
         .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-        .btn-primary { background: #4f8ef7; color: #fff; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
-        .btn-primary:hover:not(:disabled) { background: #3a7de0; }
+        .btn-primary { background: #6161ff; color: #fff; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
+        .btn-primary:hover:not(:disabled) { background: #4d4de6; }
         .btn-ghost { background: transparent; color: ${dk ? "#8892b0" : "#718096"}; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
-        .btn-ghost:hover { color: ${dk ? "#e2e8f0" : "#1a202c"}; border-color: #4f8ef7; }
+        .btn-ghost:hover { color: ${dk ? "#e2e8f0" : "#1a202c"}; border-color: #6161ff; }
         .btn-danger { background: transparent; color: #e53e3e; border: 1px solid #e53e3e; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; margin-right: auto; }
         .btn-danger:hover { background: rgba(229,62,62,0.08); }
         .color-picker-row { display: flex; align-items: center; gap: 10px; }

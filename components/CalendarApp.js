@@ -7,7 +7,6 @@ import SignaturePrint from "./SignaturePrint";
 import { PROGRAMS, getTeamColor, getTeamName, MONTHS, DAYS_OF_WEEK } from "../lib/constants";
 import * as I from "./Icons";
 
-const POLL = 30000;
 const ICONS = { hospital: I.HospitalIcon, vaccine: I.VaccineIcon, heart: I.HeartIcon, family: I.FamilyIcon, transport: I.TransportIcon, activity: I.ActivityIcon, medical: I.MedicalIcon, shield: I.ShieldIcon, leaf: I.LeafIcon };
 const VIEWS = [["month", "Month"], ["week", "Week"], ["day", "Day"], ["year", "Year"], ["agenda", "Agenda"], ["timeline", "Timeline"], ["table", "Table"]];
 
@@ -74,12 +73,9 @@ export default function CalendarApp({ readOnly = false }) {
     finally { if (!silent) setLoading(false); }
   }, [programId, program.title]);
 
-  useEffect(() => { load(); const id = setInterval(() => load(true), POLL); return () => clearInterval(id); }, [load]);
-  useEffect(() => {
-    const f = () => document.visibilityState === "visible" && load(true);
-    document.addEventListener("visibilitychange", f);
-    return () => document.removeEventListener("visibilitychange", f);
-  }, [load]);
+  // One-time fetch per board: loads the first time a board is opened, then stays cached.
+  // New data only comes in on manual Refresh or a browser reload.
+  useEffect(() => { if (!byProgram[programId]) load(); }, [programId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function save(p) {
     const ev = { id: p.id || undefined, team: p.team || "", date: p.date, details: p.details || "", title: program.title, venue: p.venue || "", color: p.color || "" };

@@ -116,7 +116,13 @@ export default function CalendarApp({ readOnly = false }) {
   const on = (d) => byDate[ds(d)] || [];
 
   const cy = cursor.getFullYear(), cm = cursor.getMonth();
-  const monthCount = shown.filter((e) => e.date.slice(0, 7) === `${cy}-${pad(cm + 1)}`).length;
+  const range = (() => {
+    if (view === "year") return [`${cy}-01-01`, `${cy}-12-31`, "this year"];
+    if (view === "day") return [ds(cursor), ds(cursor), "on this day"];
+    if (view === "week") { const a = addDays(cursor, -cursor.getDay()); return [ds(a), ds(addDays(a, 6)), "this week"]; }
+    return [`${cy}-${pad(cm + 1)}-01`, `${cy}-${pad(cm + 1)}-31`, "this month"];
+  })();
+  const rangeCount = shown.filter((e) => e.date >= range[0] && e.date <= range[1]).length;
 
   function step(n) {
     setCursor((c) => {
@@ -143,12 +149,12 @@ export default function CalendarApp({ readOnly = false }) {
   const openEv = (ev, e) => { e && e.stopPropagation(); readOnly ? setSel(ev.date) : setModal({ event: ev, defaultDate: ev.date }); };
   const goDay = (d) => { setCursor(d); setView("day"); setSel(null); };
 
-  const Chip = ({ ev }) => <div className="chip" style={{ "--c": colorOf(ev) }} title={label(ev)} onClick={(e) => openEv(ev, e)}>{label(ev)}</div>;
+  const Chip = ({ ev }) => <div key={ev.id} className="chip" style={{ "--c": colorOf(ev) }} title={label(ev)} onClick={(e) => openEv(ev, e)}>{label(ev)}</div>;
   const Card = ({ ev }) => {
     const [v, txt] = splitDetails(ev.details);
     const venue = v;
     return (
-      <button className="card" style={{ "--c": colorOf(ev) }} onClick={(e) => openEv(ev, e)}>
+      <button key={ev.id} className="card" style={{ "--c": colorOf(ev) }} onClick={(e) => openEv(ev, e)}>
         <b>{label(ev)}</b>
         {(teams.length > 0 && ev.venue) && <small>{teamName(ev)}</small>}
         {venue && <small>{venue}</small>}
@@ -166,7 +172,7 @@ export default function CalendarApp({ readOnly = false }) {
     const weeks = Math.ceil((first.getDay() + new Date(cy, cm + 1, 0).getDate()) / 7);
     const start = addDays(first, -first.getDay());
     return (
-      <div className="frame" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <div className="frame grow" style={{ display: "flex", flexDirection: "column" }}>
         <div className="dow">{DAYS_OF_WEEK.map((d) => <div key={d}>{d}</div>)}</div>
         <div className="mgrid" style={{ gridTemplateRows: `repeat(${weeks}, minmax(104px, 1fr))` }}>
           {Array.from({ length: weeks * 7 }, (_, i) => {
@@ -175,7 +181,7 @@ export default function CalendarApp({ readOnly = false }) {
               <div key={k} className={`cell${d.getMonth() !== cm ? " out" : ""}${k === todayStr ? " today" : ""}${k === sel ? " sel" : ""}`} onClick={() => setSel(k === sel ? null : k)}>
                 <div className="dn">{d.getDate()}</div>
                 {!readOnly && <button className="add" aria-label="Add schedule" onClick={(e) => { e.stopPropagation(); addAt(k); }}>+</button>}
-                {evs.slice(0, 3).map((ev) => <Chip key={ev.id} ev={ev} />)}
+                {evs.slice(0, 3).map((ev) => Chip({ ev }))}
                 {evs.length > 3 && <button className="more" onClick={(e) => { e.stopPropagation(); setSel(k); }}>+{evs.length - 3} more</button>}
               </div>
             );
@@ -194,7 +200,7 @@ export default function CalendarApp({ readOnly = false }) {
             <div key={k} className={`wcol${k === todayStr ? " today" : ""}`} onClick={() => setSel(k)}>
               <div className="wh"><span className="dn">{d.getDate()}</span><small>{DAYS_OF_WEEK[i]}</small></div>
               {!readOnly && <button className="add" aria-label="Add schedule" onClick={(e) => { e.stopPropagation(); addAt(k); }}>+</button>}
-              {on(d).map((ev) => <Card key={ev.id} ev={ev} />)}
+              {on(d).map((ev) => Card({ ev }))}
             </div>
           );
         })}
@@ -204,10 +210,11 @@ export default function CalendarApp({ readOnly = false }) {
   function Day() {
     const evs = on(cursor);
     return (
-      <div className="frame" style={{ flex: 1 }}>
+      <div className="frame grow">
         <div className="dayv">
           <h3>{evs.length ? `${evs.length} schedule${evs.length > 1 ? "s" : ""}` : "No schedules"}</h3>
-          {evs.length ? evs.map((ev) => <Card key={ev.id} ev={ev} />) : <Empty date={ds(cursor)} text="Nothing scheduled for this day" />}
+          {evs.length ? evs.map((ev) => Card({ ev })) : <Empty date={ds(cursor)} text="Nothing scheduled for this day" />}
+          {evs.length > 0 && !readOnly && <button className="hb" style={{ alignSelf: "flex-start" }} onClick={() => addAt(ds(cursor))}>+ Add schedule</button>}
         </div>
       </div>
     );
@@ -237,13 +244,13 @@ export default function CalendarApp({ readOnly = false }) {
   function Agenda() {
     const days = Object.keys(byDate).filter((k) => k.slice(0, 7) === `${cy}-${pad(cm + 1)}`).sort();
     return (
-      <div className="frame" style={{ flex: 1 }}>
+      <div className="frame grow">
         {days.length === 0 ? <Empty text={`No schedules in ${MONTHS[cm]}`} /> : days.map((k) => {
           const d = pd(k);
           return (
             <div className="agd" key={k}>
               <div className={`d${k === todayStr ? " td" : ""}`}><b>{d.getDate()}</b><small>{DAYS_OF_WEEK[d.getDay()]}</small></div>
-              <div className="l">{byDate[k].map((ev) => <Card key={ev.id} ev={ev} />)}</div>
+              <div className="l">{byDate[k].map((ev) => Card({ ev }))}</div>
             </div>
           );
         })}
@@ -259,7 +266,7 @@ export default function CalendarApp({ readOnly = false }) {
       (r.days[+e.date.slice(8)] = r.days[+e.date.slice(8)] || []).push(e);
     });
     const list = Object.values(rows).sort((a, b) => a.name.localeCompare(b.name));
-    if (!list.length) return <div className="frame" style={{ flex: 1 }}><Empty text={`No schedules in ${MONTHS[cm]}`} /></div>;
+    if (!list.length) return <div className="frame grow"><Empty text={`No schedules in ${MONTHS[cm]}`} /></div>;
     const dayCls = (i) => { const d = new Date(cy, cm, i + 1); return (d.getDay() % 6 === 0 ? " we" : "") + (ds(d) === todayStr ? " tdc" : ""); };
     return (
       <div className="frame"><div className="tl" style={{ gridTemplateColumns: `180px repeat(${n}, minmax(36px, 1fr))` }}>
@@ -323,7 +330,7 @@ export default function CalendarApp({ readOnly = false }) {
             <button className="hb" onClick={() => load()} title="Refresh"><I.RefreshIcon size={14} /><span className="lb">{stamp}</span></button>
             <SignaturePanel config={sig} onChange={setSig} theme={theme} />
             <button className="hb" onClick={() => window.print()}><I.PrinterIcon size={14} /><span className="lb">Print</span></button>
-            {!readOnly && <button className="hb primary" onClick={() => addAt(sel || todayStr)}>+ <span className="lb">New schedule</span></button>}
+            {!readOnly && <button className="hb primary" onClick={() => addAt(sel || (view === "day" ? ds(cursor) : todayStr))}>+ <span className="lb">New schedule</span></button>}
           </div>
           <div className="tabs" role="tablist">
             {VIEWS.map(([id, name]) => <button key={id} role="tab" aria-selected={view === id} className={`tab${view === id ? " on" : ""}`} onClick={() => { setView(id); setSel(null); }}>{name}</button>)}
@@ -336,7 +343,7 @@ export default function CalendarApp({ readOnly = false }) {
               <h2>{title()}</h2>
               {brgy && <button className="chipf" onClick={() => setBrgy("")}>{getTeamName(brgy, teams)} <I.CloseIcon size={12} /></button>}
               <span className="sp" />
-              <span style={{ color: "var(--mute)" }}>{monthCount} this month</span>
+              <span style={{ color: "var(--mute)" }}>{rangeCount} {range[2]}</span>
               <label className="search"><I.SearchIcon size={14} /><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search schedules" /></label>
             </div>
           )}
@@ -352,13 +359,13 @@ export default function CalendarApp({ readOnly = false }) {
               </div>
               {view === "table"
                 ? <SheetView events={events} onEdit={(ev) => openEv(ev)} onAdd={(d) => addAt(d || todayStr)} theme={theme} onRefresh={() => load()} refreshLabel={stamp} teams={teams} eventTitle={program.title} programId={programId} readOnly={readOnly} />
-                : <Views />}
+                : Views()}
               <SignaturePrint config={sig} />
             </div>
             {sel && view !== "table" && (
               <aside className="drawer">
                 <div className="dh"><div><small>Schedule</small><b>{longDate(pd(sel))}</b></div><button className="hb icon" onClick={() => setSel(null)} aria-label="Close"><I.CloseIcon size={14} /></button></div>
-                <div className="db">{selEvents.length ? selEvents.map((ev) => <Card key={ev.id} ev={ev} />) : <Empty text="Nothing scheduled" />}</div>
+                <div className="db">{selEvents.length ? selEvents.map((ev) => Card({ ev })) : <Empty text="Nothing scheduled" />}</div>
                 <div className="df">
                   {!readOnly && <button className="hb primary" onClick={() => addAt(sel)}>+ Add schedule</button>}
                   {readOnly && <button className="hb" onClick={() => goDay(pd(sel))}>Open day view</button>}

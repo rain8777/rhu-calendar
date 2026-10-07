@@ -1,8 +1,9 @@
+import { parseMeta } from "../lib/meta";
 import { useState, useMemo } from "react";
 import { getTeamColor, getTeamName } from "../lib/constants";
 import { SearchIcon, CloseIcon, RefreshIcon, PrinterIcon, DownloadIcon } from "./Icons";
 
-export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle, readOnly, programId }) {
+export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle, readOnly, programId, barangays = [] }) {
   const dk = theme === "dark";
   const showPrintTitle = ["RHU Activities", "Transportation Service", "Family Planning"].includes(eventTitle);
 
@@ -64,21 +65,10 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
     return `${m}/${d}/${y}`;
   }
 
-  function parseVenue(details) {
-    if (details && details.startsWith("Venue: ")) {
-      const i = details.indexOf("\n");
-      return i > -1 ? details.slice(7, i) : details.slice(7);
-    }
-    return "";
-  }
+  const usesMeta = teams.length === 0 || programId === "nip";
+  function parseVenue(details) { return usesMeta ? parseMeta(details).venue : ""; }
 
-  function cleanDetails(details) {
-    if (details && details.startsWith("Venue: ")) {
-      const i = details.indexOf("\n");
-      return i > -1 ? details.slice(i + 1) : "";
-    }
-    return details;
-  }
+  function cleanDetails(details) { return usesMeta ? parseMeta(details).text : details || ""; }
 
   return (
     <div className="sheet-wrap">
@@ -245,9 +235,9 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                     <th>Venue</th>
                   </>
                 ) : (
-                  <th>{teams.length > 0 ? "Barangay" : "Activity"}</th>
+                  teams.length > 0 ? <th>Barangay</th> : (<><th>Activity</th><th>Location</th><th>Barangay</th></>)
                 )}
-                <th>{teams.length > 0 ? "Details" : "Venue"}</th>
+                <th>Details</th>
                 {!readOnly && <th></th>}
               </tr>
             </thead>
@@ -268,6 +258,12 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                       <td className="venue-cell">
                         {parseVenue(ev.details) || <span className="dash">—</span>}
                       </td>
+                    </>
+                  ) : teams.length === 0 ? (
+                    <>
+                      <td className="activity-cell">{ev.venue || <span className="dash">—</span>}</td>
+                      <td className="venue-cell">{parseVenue(ev.details) || <span className="dash">—</span>}</td>
+                      <td>{parseMeta(ev.details).barangay ? getTeamName(parseMeta(ev.details).barangay, barangays) : <span className="dash">—</span>}</td>
                     </>
                   ) : (
                     <td>
@@ -304,10 +300,10 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                         cleanDetails(ev.details) || <span className="dash">—</span>
                       )
                     ) : (
-                      filterDetails && ev.details ? (
-                        <HighlightText text={ev.details} query={filterDetails} />
+                      filterDetails && cleanDetails(ev.details) ? (
+                        <HighlightText text={cleanDetails(ev.details)} query={filterDetails} />
                       ) : (
-                        ev.details || <span className="dash">—</span>
+                        cleanDetails(ev.details) || <span className="dash">—</span>
                       )
                     )}
                   </td>

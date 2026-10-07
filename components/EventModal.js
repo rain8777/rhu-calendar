@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { getTeamColor } from "../lib/constants";
 import { CloseIcon } from "./Icons";
+import { parseMeta, buildDetails } from "../lib/meta";
 
-export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType, programId }) {
+export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType, programId, barangays = [] }) {
   const dk = theme === "dark";
   const isActivity = programType === "activity";
   const activityRequired = eventTitle === "Family Planning";
@@ -11,12 +12,12 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
 
   const rawDetails = event?.details || "";
   const shouldParseVenue = isActivity || programId === "nip";
-  const parsed = shouldParseVenue && rawDetails.startsWith("Venue: ")
-    ? (() => { const i = rawDetails.indexOf("\n"); return i > -1 ? [rawDetails.slice(7, i), rawDetails.slice(i+1)] : [rawDetails.slice(7), ""]; })()
-    : [null, rawDetails];
+  const meta = parseMeta(rawDetails);
+  const parsed = shouldParseVenue ? [meta.venue, meta.text] : [null, rawDetails];
 
   const [venue,   setVenue]   = useState(event?.venue   || "");
   const [venueLocation, setVenueLocation] = useState(parsed[0] || "");
+  const [actBarangay, setActBarangay] = useState(meta.barangay || "");
   const [color,   setColor]   = useState(event?.color   || "#6161ff");
   const [date,    setDate]    = useState(event?.date    || defaultDate || "");
   const [details, setDetails] = useState(parsed[1] || "");
@@ -28,9 +29,9 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
     if (!date) { setError("Date is required."); return; }
     if (activityRequired && !venue.trim()) { setError("Activity Name is required."); return; }
     setSaving(true); setError("");
-    const finalDetails = (isActivity || programId === "nip") && venueLocation
-      ? "Venue: " + venueLocation + "\n" + details
-      : details;
+    const finalDetails = isActivity
+      ? buildDetails({ venue: venueLocation, barangay: actBarangay, text: details })
+      : programId === "nip" ? buildDetails({ venue: venueLocation, text: details }) : details;
     try {
       await onSave({ id: event?.id, team, venue, color, date, details: finalDetails });
       onClose();
@@ -68,8 +69,15 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         {isActivity ? (
           <>
             <div className="field">
-              <label>Venue</label>
-              <input type="text" value={venueLocation} onChange={(e) => setVenueLocation(e.target.value)} placeholder="e.g. RHU Main Office, Barangay Hall" />
+              <label>Location</label>
+              <input type="text" value={venueLocation} onChange={(e) => setVenueLocation(e.target.value)} placeholder="e.g. Zone 7, RHU Main Office, Barangay Hall" />
+            </div>
+            <div className="field">
+              <label>Barangay (optional)</label>
+              <select value={actBarangay} onChange={(e) => setActBarangay(e.target.value)}>
+                <option value="">— None —</option>
+                {barangays.map((t) => (<option key={t.id} value={t.id}>{t.name}</option>))}
+              </select>
             </div>
             <div className="field">
               <label>Color</label>

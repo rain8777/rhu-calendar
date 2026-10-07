@@ -320,7 +320,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
       )}
 
       <style jsx>{`
-        .sheet-wrap { padding: 24px; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+        .sheet-wrap { padding: 6px 0 8px; display: flex; flex-direction: column; }
 
         .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
         .toolbar h2 { margin: 0; color: ${dk ? "#e2e8f0" : "#1a202c"}; font-size: 1.2rem; }
@@ -382,7 +382,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
 
         .empty { color: ${dk ? "#8892b0" : "#a0aec0"}; text-align: center; padding: 60px 0; font-size: 0.95rem; }
 
-        .table-wrap { flex: 1; overflow-y: auto; border-radius: 8px; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; }
+        .table-wrap { overflow: clip; border-radius: 8px; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; }
         .sheet-table { width: 100%; border-collapse: collapse; }
         .sheet-table th {
           text-align: left; padding: 10px 14px; font-size: 0.74rem;
@@ -450,6 +450,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           @page { size: A4 portrait; margin: 0.5in; }
           .print-title { display: block; text-align: center; font-size: 1.2rem; font-weight: 700; color: #1a202c; margin-bottom: 16px; padding-top: 8px; }
           .btn-print { display: none !important; }
+          .btn-add, .btn-refresh { display: none !important; }
           .btn-export { display: none !important; }
           .print-header {
             display: flex !important;

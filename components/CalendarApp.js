@@ -298,7 +298,7 @@ export default function CalendarApp({ readOnly = false }) {
     const tip = (e) => (sub(e) ? `${label(e)} — ${sub(e)}` : label(e));
 
     return (
-      <div className="frame">
+      <div className="frame tlf" style={{ "--nd": n }}>
         <div className="tlbar">
           <b>{list.length} {teams.length ? (list.length === 1 ? "barangay" : "barangays") : (list.length === 1 ? "activity" : "activities")}</b>
           <span>{total} schedule{total === 1 ? "" : "s"} in {MONTHS[cm]}</span>
@@ -307,11 +307,11 @@ export default function CalendarApp({ readOnly = false }) {
           <span className="lgd"><i className="sw" style={{ background: "var(--brand)" }} />Today</span>
           <span className="lgd"><i className="sw" style={{ background: "#6b7280" }} />Scheduled</span>
         </div>
-        <div className="tl" style={{ "--nd": n, gridTemplateColumns: `var(--lw) repeat(${n}, minmax(38px, 1fr))`, gridTemplateRows: `28px 48px repeat(${list.length}, minmax(48px, auto))` }}>
+        <div className="tl" style={{ "--nd": n, gridTemplateColumns: `var(--lw) repeat(${n}, minmax(24px, 1fr))`, gridTemplateRows: `28px 48px repeat(${list.length}, minmax(48px, auto))` }}>
           <div className="corner" style={{ gridRow: "1 / span 2", gridColumn: 1 }}>{teams.length ? "Barangay" : "Activity"}</div>
           {bands.map((b) => <div key={"w" + b.from} className="wk" style={{ gridRow: 1, gridColumn: `${b.from + 1} / span ${b.len}` }}>{MONTHS[cm].slice(0, 3)} {b.from}{b.len > 1 ? `–${b.from + b.len - 1}` : ""}</div>)}
           {Array.from({ length: n }, (_, i) => { const x = dayInfo(i); return (
-            <div key={"h" + i} className={`dh${x.we ? " we" : ""}${x.td ? " td" : ""}`} style={{ gridRow: 2, gridColumn: i + 2 }}><small>{DAYS_OF_WEEK[x.d.getDay()][0]}</small><b>{i + 1}</b></div>
+            <div key={"h" + i} className={`dcell${x.we ? " we" : ""}${x.td ? " td" : ""}`} style={{ gridRow: 2, gridColumn: i + 2 }}><small>{DAYS_OF_WEEK[x.d.getDay()][0]}</small><b>{i + 1}</b></div>
           ); })}
           {list.map((r, ri) => [
             <div key={"l" + r.key} className={`rl${ri % 2 ? " z" : ""}`} style={{ gridRow: ri + 3, gridColumn: 1 }}>
@@ -400,12 +400,14 @@ export default function CalendarApp({ readOnly = false }) {
           {error && <div className="note err">{error} — <button onClick={() => loadAll()}>Retry</button></div>}
 
           <div className="body">
-            <div className="view">
-              <div className="print-head">
+            <div className={`view${view === "timeline" ? " flush" : ""}`}>
+              {view !== "table" && (
+                <div className="print-head">
                 <div><img src="/Logo/LGU.png" alt="" /><img src="/Logo/RHU.png" alt="" /></div>
                 <div className="c">Republic of the Philippines<br />Province of Camarines Sur<br />Municipality of Ragay<b>{program.label} — {title()}</b></div>
                 <div>{programId === "nip" && <img src="/Logo/NIP.png" alt="" />}<img src="/Logo/Bagong_pilipinas.png" alt="" /></div>
               </div>
+              )}
               {pending && !byProgram[programId]
                 ? <div className="frame grow"><div className="empty"><b>Loading all schedules…</b>This only happens once.</div></div>
                 : view === "table"

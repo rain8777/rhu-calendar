@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { getTeamColor } from "../lib/constants";
 import { CloseIcon } from "./Icons";
 import { parseMeta, buildDetails } from "../lib/meta";
 
 export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType, programId, barangays = [] }) {
+  // Close on backdrop click only if the press AND the release both happened on the backdrop.
+  // (Dragging a text selection out of the modal must not dismiss it.)
+  const pressedOnBackdrop = useRef(false);
+  const releasedOnBackdrop = useRef(false);
   const dk = theme === "dark";
   const isActivity = programType === "activity";
   const activityRequired = eventTitle === "Family Planning";
@@ -49,7 +53,12 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
   }
 
   return (
-    <div className="overlay" onClick={onClose}>
+    <div
+      className="overlay"
+      onMouseDown={(e) => { pressedOnBackdrop.current = e.target === e.currentTarget; releasedOnBackdrop.current = false; }}
+      onMouseUp={(e) => { releasedOnBackdrop.current = e.target === e.currentTarget; }}
+      onClick={() => { const ok = pressedOnBackdrop.current && releasedOnBackdrop.current; pressedOnBackdrop.current = false; releasedOnBackdrop.current = false; if (ok) onClose(); }}
+    >
       <div className="box" onClick={(e) => e.stopPropagation()}>
         <div className="header">
           <h2>{isEdit ? "Edit Schedule" : "Add Schedule"}</h2>

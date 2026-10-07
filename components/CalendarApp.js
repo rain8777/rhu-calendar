@@ -307,7 +307,7 @@ export default function CalendarApp({ readOnly = false }) {
           <span className="lgd"><i className="sw" style={{ background: "var(--brand)" }} />Today</span>
           <span className="lgd"><i className="sw" style={{ background: "#6b7280" }} />Scheduled</span>
         </div>
-        <div className="tl" style={{ gridTemplateColumns: `var(--lw) repeat(${n}, minmax(38px, 1fr))`, gridTemplateRows: `28px 48px repeat(${list.length}, 48px)` }}>
+        <div className="tl" style={{ "--nd": n, gridTemplateColumns: `var(--lw) repeat(${n}, minmax(38px, 1fr))`, gridTemplateRows: `28px 48px repeat(${list.length}, minmax(48px, auto))` }}>
           <div className="corner" style={{ gridRow: "1 / span 2", gridColumn: 1 }}>{teams.length ? "Barangay" : "Activity"}</div>
           {bands.map((b) => <div key={"w" + b.from} className="wk" style={{ gridRow: 1, gridColumn: `${b.from + 1} / span ${b.len}` }}>{MONTHS[cm].slice(0, 3)} {b.from}{b.len > 1 ? `–${b.from + b.len - 1}` : ""}</div>)}
           {Array.from({ length: n }, (_, i) => { const x = dayInfo(i); return (
@@ -322,7 +322,7 @@ export default function CalendarApp({ readOnly = false }) {
               <div key={r.key + "c" + i} className={`bg${x.we ? " we" : ""}${x.td ? " td" : ""}${ri % 2 ? " z" : ""}`} style={{ gridRow: ri + 3, gridColumn: i + 2 }} />
             ); }),
             ...runsOf(r).map((run) => (
-              <button key={r.key + "b" + run.from} className="bar" style={{ "--c": colorOf(run.evs[0]), gridRow: ri + 3, gridColumn: `${run.from + 1} / span ${run.len}` }}
+              <button key={r.key + "b" + run.from} className="tbar" style={{ "--c": colorOf(run.evs[0]), gridRow: ri + 3, gridColumn: `${run.from + 1} / span ${run.len}` }}
                 title={run.evs.map(tip).join("\n")} onClick={() => setSel(pre + pad(run.from))}>
                 {run.len > 1 ? `${run.len} days` : run.evs.length > 1 ? run.evs.length : ""}
               </button>

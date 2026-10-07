@@ -1,15 +1,16 @@
 import { useState, useRef } from "react";
-import { getTeamColor } from "../lib/constants";
+import { getTeamColor, MEDIC_TYPES } from "../lib/constants";
 import { CloseIcon } from "./Icons";
 import { parseMeta, buildDetails } from "../lib/meta";
 
-export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType, programId, barangays = [] }) {
+export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType, programId, barangays = [], nameSuggestions = [] }) {
   // Close on backdrop click only if the press AND the release both happened on the backdrop.
   // (Dragging a text selection out of the modal must not dismiss it.)
   const pressedOnBackdrop = useRef(false);
   const releasedOnBackdrop = useRef(false);
   const dk = theme === "dark";
-  const isActivity = programType === "activity";
+  const isMedic = programType === "medic";
+  const isActivity = programType === "activity" || isMedic; // both keep Location + Barangay in the details text
   const activityRequired = eventTitle === "Family Planning";
   const defaultTeam = teams[0]?.id || "agao-ao";
   const [team,    setTeam]    = useState(event?.team    || defaultTeam);
@@ -22,6 +23,20 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
   const [venue,   setVenue]   = useState(event?.venue   || "");
   const [venueLocation, setVenueLocation] = useState(parsed[0] || "");
   const [actBarangay, setActBarangay] = useState(meta.barangay || "");
+  const [names, setNames] = useState(meta.names || []);
+  const [nameInput, setNameInput] = useState("");
+  const nameBox = useRef(null);
+
+  // split on comma / semicolon / new line, drop blanks and duplicates (case-insensitive)
+  const addNames = (list, text) => {
+    const out = [...list];
+    text.split(/[,;\n]/).map((t) => t.trim()).filter(Boolean).forEach((t) => {
+      if (!out.some((n) => n.toLowerCase() === t.toLowerCase())) out.push(t);
+    });
+    return out;
+  };
+  const commitName = () => { if (nameInput.trim()) { setNames((n) => addNames(n, nameInput)); setNameInput(""); } };
+  const typeOptions = event?.venue && !MEDIC_TYPES.some((t) => t.name === event.venue) ? [{ name: event.venue }, ...MEDIC_TYPES] : MEDIC_TYPES;
   const [color,   setColor]   = useState(event?.color   || "#6161ff");
   const [date,    setDate]    = useState(event?.date    || defaultDate || "");
   const [details, setDetails] = useState(parsed[1] || "");
@@ -32,12 +47,16 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
   async function handleSave() {
     if (!date) { setError("Date is required."); return; }
     if (activityRequired && !venue.trim()) { setError("Activity Name is required."); return; }
+    const allNames = addNames(names, nameInput);
+    if (isMedic && !venue) { setError("Please choose a type."); return; }
+    if (isMedic && allNames.length === 0) { setError("Add at least one name."); return; }
     setSaving(true); setError("");
     const finalDetails = isActivity
-      ? buildDetails({ venue: venueLocation, barangay: actBarangay, text: details })
+      ? buildDetails({ venue: venueLocation, barangay: actBarangay, names: isMedic ? allNames : [], text: details })
       : programId === "nip" ? buildDetails({ venue: venueLocation, text: details }) : details;
     try {
-      await onSave({ id: event?.id, team, venue, color, date, details: finalDetails });
+      // Only boards with a color picker store a color; the others derive it (barangay / type) when displayed.
+      await onSave({ id: event?.id, team, venue, color: programType === "activity" ? color : "", date, details: finalDetails });
       onClose();
     } catch (e) {
       setError(e.message || "Save failed.");
@@ -70,10 +89,54 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
           <div className="fixed-title">{eventTitle}</div>
         </div>
 
+        {isMedic ? (
+          <>
+            <div className="field">
+              <label>Type *</label>
+              <select value={venue} onChange={(e) => setVenue(e.target.value)}>
+                <option value="">Select type…</option>
+                {typeOptions.map((t) => (<option key={t.name} value={t.name}>{t.name}</option>))}
+              </select>
+              {venue && <div className="color-bar" style={{ background: (MEDIC_TYPES.find((t) => t.name === venue) || {}).color || "#8892b0" }} />}
+            </div>
+            <div className="field">
+              <label>Names *</label>
+              <div className="names-box" onClick={() => nameBox.current && nameBox.current.focus()}>
+                {names.map((n, i) => (
+                  <span className="name-chip" key={n + i}>
+                    {n}
+                    <button type="button" aria-label={`Remove ${n}`} onClick={(e) => { e.stopPropagation(); setNames(names.filter((_, k) => k !== i)); }}>×</button>
+                  </span>
+                ))}
+                <input
+                  ref={nameBox}
+                  type="text"
+                  list="medic-name-list"
+                  value={nameInput}
+                  placeholder={names.length ? "Add another name…" : "Type a name, then press Enter"}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (/[,;\n]/.test(v)) { setNames((n) => addNames(n, v)); setNameInput(""); } else setNameInput(v);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") { e.preventDefault(); commitName(); }
+                    else if (e.key === "Backspace" && !nameInput && names.length) setNames(names.slice(0, -1));
+                  }}
+                  onBlur={commitName}
+                />
+              </div>
+              <datalist id="medic-name-list">
+                {nameSuggestions.filter((n) => !names.some((x) => x.toLowerCase() === n.toLowerCase())).map((n) => (<option key={n} value={n} />))}
+              </datalist>
+              <div className="hint">Press Enter or comma after each name. Add as many as you need.</div>
+            </div>
+          </>
+        ) : (
         <div className="field">
           <label>Activity Name{activityRequired ? " *" : " (optional)"}</label>
           <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder={activityRequired ? "Required — this displays on the calendar" : "Displayed on calendar — leave blank to show barangay"} />
         </div>
+        )}
 
         {isActivity ? (
           <>
@@ -88,13 +151,13 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
                 {barangays.map((t) => (<option key={t.id} value={t.id}>{t.name}</option>))}
               </select>
             </div>
-            <div className="field">
+            {!isMedic && <div className="field">
               <label>Color</label>
               <div className="color-picker-row">
                 <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="color-picker" />
                 <span className="color-hex">{color}</span>
               </div>
-            </div>
+            </div>}
           </>
         ) : (
           <>
@@ -139,7 +202,7 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .box {
           background: ${dk ? "#1e2235" : "#ffffff"};
-          border-radius: 12px; padding: 28px; width: 420px; max-width: 95vw;
+          border-radius: 12px; padding: 28px; width: 440px; max-width: 95vw; max-height: 92vh; overflow-y: auto;
           border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"};
           box-shadow: 0 8px 32px rgba(0,0,0,${dk ? "0.5" : "0.12"});
         }
@@ -159,6 +222,15 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
         select:focus, input:focus, textarea:focus { border-color: #6161ff; }
         input[type="text"]::placeholder { color: ${dk ? "#4a5278" : "#a0aec0"}; }
         textarea { resize: vertical; font-family: inherit; }
+        .names-box { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 6px 8px; min-height: 42px; box-sizing: border-box; cursor: text;
+          background: ${dk ? "#131929" : "#f7fafc"}; border: 1px solid ${dk ? "#2d3354" : "#d1d9e6"}; border-radius: 6px; }
+        .names-box:focus-within { border-color: #6161ff; }
+        .names-box input[type="text"] { flex: 1; min-width: 140px; width: auto; border: 0; background: transparent; padding: 4px 2px; }
+        .name-chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 4px 3px 10px; border-radius: 14px; font-size: 0.85rem; font-weight: 600;
+          background: ${dk ? "#2c2f5c" : "#ecebff"}; color: ${dk ? "#c9c9ff" : "#4d4de6"}; }
+        .name-chip button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 1rem; line-height: 1; width: 20px; height: 20px; border-radius: 50%; padding: 0; }
+        .name-chip button:hover { background: rgba(97,97,255,0.2); }
+        .hint { font-size: 0.74rem; color: ${dk ? "#8892b0" : "#a0aec0"}; margin-top: 6px; }
         .color-bar { height: 3px; border-radius: 2px; margin-top: 6px; transition: background 0.2s; }
         .error-msg { color: #e53e3e; font-size: 0.85rem; margin-bottom: 12px; padding: 8px 12px; background: rgba(229,62,62,0.08); border-radius: 6px; }
         .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }

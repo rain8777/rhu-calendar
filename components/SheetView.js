@@ -1,20 +1,19 @@
 import { parseMeta } from "../lib/meta";
 import { useState, useMemo } from "react";
-import { getTeamColor, getTeamName } from "../lib/constants";
+import { getTeamColor, getTeamName, getMedicColor, MEDIC_TYPES } from "../lib/constants";
 import { SearchIcon, CloseIcon, RefreshIcon, PrinterIcon, DownloadIcon } from "./Icons";
 
 export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, refreshLabel, teams, eventTitle, readOnly, programId, barangays = [] }) {
   const dk = theme === "dark";
-  const showPrintTitle = ["RHU Activities", "Transportation Service", "Family Planning"].includes(eventTitle);
+  const isMedic = programId === "medic";
+  const showPrintTitle = ["RHU Activities", "Transportation Service", "Medic Support"].includes(eventTitle);
 
   const PRINT_TITLES = {
     purokalusugan: "PuroKalusugan",
     nip: "LIGTAS TIGDAS",
-    philhealth: "Philhealth Yakap",
     ncd: "VIA and CBE",
-    familyplanning: "Family Planning",
-    mnao: "MNAO",
     rhuactivities: "RHU ACTIVITIES",
+    medic: "MEDIC SUPPORT",
     transportation: "TRANSPORTATION",
   };
   const printTitle = PRINT_TITLES[programId] || eventTitle;
@@ -27,6 +26,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
   const [filterActivity, setFilterActivity] = useState("");
   const [filterBarangay, setFilterBarangay] = useState("");
   const [filterDetails,  setFilterDetails]  = useState("");
+  const [filterName,     setFilterName]     = useState("");
 
   const filtered = useMemo(() => {
     return [...events]
@@ -36,15 +36,16 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         if (filterDateTo && evDate > filterDateTo) return false;
         if (filterYear && evDate.slice(0,4) !== filterYear) return false;
         if (filterMonth && evDate.slice(5,7) !== filterMonth) return false;
-        if (filterActivity && !ev.venue?.toLowerCase().includes(filterActivity.toLowerCase())) return false;
-        if (filterBarangay && ev.team !== filterBarangay) return false;
+        if (filterActivity && (isMedic ? ev.venue !== filterActivity : !ev.venue?.toLowerCase().includes(filterActivity.toLowerCase()))) return false;
+        if (filterBarangay && (teams.length > 0 ? ev.team : parseMeta(ev.details).barangay) !== filterBarangay) return false;
+        if (filterName && !parseMeta(ev.details).names.join(" ").toLowerCase().includes(filterName.toLowerCase())) return false;
         if (filterDetails && !ev.details?.toLowerCase().includes(filterDetails.toLowerCase())) return false;
         return true;
       })
       .sort((a, b) => a.date.localeCompare(b.date));
-  }, [events, filterDateFrom, filterDateTo, filterYear, filterMonth, filterActivity, filterBarangay, filterDetails]);
+  }, [events, filterDateFrom, filterDateTo, filterYear, filterMonth, filterActivity, filterBarangay, filterDetails, filterName, isMedic, teams]);
 
-  const hasFilters = filterDateFrom || filterDateTo || filterYear || filterMonth || filterActivity || filterBarangay || filterDetails;
+  const hasFilters = filterDateFrom || filterDateTo || filterYear || filterMonth || filterActivity || filterBarangay || filterDetails || filterName;
 
   function clearFilters() {
     setFilterDateFrom("");
@@ -54,6 +55,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
     setFilterActivity("");
     setFilterBarangay("");
     setFilterDetails("");
+    setFilterName("");
   }
 
   const years = [];
@@ -152,24 +154,47 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
           </select>
         </div>
 
+        {isMedic ? (
+          <>
+            <div className="filter-group">
+              <label>Type</label>
+              <select value={filterActivity} onChange={(e) => setFilterActivity(e.target.value)} className="filter-input">
+                <option value="">All Types</option>
+                {MEDIC_TYPES.map((t) => (<option key={t.name} value={t.name}>{t.name}</option>))}
+              </select>
+            </div>
+            <div className="filter-group">
+              <label>Name</label>
+              <div className="search-wrap">
+                <span className="search-icon"><SearchIcon size={14} /></span>
+                <input type="text" value={filterName} onChange={(e) => setFilterName(e.target.value)} placeholder="Search a name…" className="filter-input search-input" />
+                {filterName && (
+                  <button className="clear-search" onClick={() => setFilterName("")}><CloseIcon size={12} /></button>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
         <div className="filter-group">
-          <label>Activity</label>
-          <div className="search-wrap">
-            <span className="search-icon"><SearchIcon size={14} /></span>
-            <input
-              type="text"
-              value={filterActivity}
-              onChange={(e) => setFilterActivity(e.target.value)}
-              placeholder="Search activity name…"
-              className="filter-input search-input"
-            />
-            {filterActivity && (
-              <button className="clear-search" onClick={() => setFilterActivity("")}><CloseIcon size={12} /></button>
-            )}
+            <label>Activity</label>
+            <div className="search-wrap">
+              <span className="search-icon"><SearchIcon size={14} /></span>
+              <input
+                type="text"
+                value={filterActivity}
+                onChange={(e) => setFilterActivity(e.target.value)}
+                placeholder="Search activity name…"
+                className="filter-input search-input"
+              />
+              {filterActivity && (
+                <button className="clear-search" onClick={() => setFilterActivity("")}><CloseIcon size={12} /></button>
+              )}
+            </div>
           </div>
-        </div>
+  
+        )}
 
-        {teams.length > 0 && (
+        {(teams.length > 0 || barangays.length > 0) && (
           <div className="filter-group">
             <label>Barangay</label>
             <select
@@ -178,7 +203,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
               className="filter-input"
             >
               <option value="">All Barangays</option>
-              {(teams || []).map((t) => (
+              {(teams.length > 0 ? teams : barangays).map((t) => (
                 <option key={t.id} value={t.id}>{t.name}</option>
               ))}
             </select>
@@ -235,7 +260,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                     <th>Venue</th>
                   </>
                 ) : (
-                  teams.length > 0 ? <th>Barangay</th> : (<><th>Activity</th><th>Location</th><th>Barangay</th></>)
+                  teams.length > 0 ? <th>Barangay</th> : isMedic ? (<><th>Type</th><th>Names</th><th>Location</th><th>Barangay</th></>) : (<><th>Activity</th><th>Location</th><th>Barangay</th></>)
                 )}
                 <th>Details</th>
                 {!readOnly && <th></th>}
@@ -258,6 +283,21 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                       <td className="venue-cell">
                         {parseVenue(ev.details) || <span className="dash">—</span>}
                       </td>
+                    </>
+                  ) : isMedic ? (
+                    <>
+                      <td>
+                        <span className="team-badge" style={{ background: getMedicColor(ev.venue) + "22", color: getMedicColor(ev.venue), borderColor: getMedicColor(ev.venue) }}>
+                          {ev.venue || "—"}
+                        </span>
+                      </td>
+                      <td className="names-cell">
+                        {parseMeta(ev.details).names.length
+                          ? parseMeta(ev.details).names.map((n) => (<span key={n} className="name-pill">{n}</span>))
+                          : <span className="dash">—</span>}
+                      </td>
+                      <td className="venue-cell">{parseVenue(ev.details) || <span className="dash">—</span>}</td>
+                      <td>{parseMeta(ev.details).barangay ? getTeamName(parseMeta(ev.details).barangay, barangays) : <span className="dash">—</span>}</td>
                     </>
                   ) : teams.length === 0 ? (
                     <>
@@ -399,6 +439,9 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         .date-cell { white-space: nowrap; color: ${dk ? "#a5b4fc" : "#4a6cf7"}; font-weight: 500; }
         .title-cell { color: ${dk ? "#a5b4fc" : "#5a67d8"}; font-weight: 500; }
         .details-cell { color: ${dk ? "#8892b0" : "#718096"}; max-width: 260px; }
+        .names-cell { min-width: 160px; }
+        .name-pill { display: inline-block; margin: 2px 4px 2px 0; padding: 2px 9px; border-radius: 12px; font-size: 0.78rem; font-weight: 600;
+          background: ${dk ? "#2c2f5c" : "#ecebff"}; color: ${dk ? "#c9c9ff" : "#4d4de6"}; }
         .venue-cell { color: ${dk ? "#a5b4fc" : "#5a67d8"}; font-weight: 500; }
         .dash { color: ${dk ? "#4a5568" : "#cbd5e0"}; }
 
@@ -447,6 +490,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
         }
 
         @media print {
+          .name-pill { background: #fff !important; border: 1px solid #cbd5e0; color: #1a202c !important; }
           @page { size: A4 portrait; margin: 0.5in; }
           .print-title { display: block; text-align: center; font-size: 1.2rem; font-weight: 700; color: #1a202c; margin-bottom: 16px; padding-top: 8px; }
           .btn-print { display: none !important; }
@@ -491,6 +535,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
 
         ${programId === "nip" ? `
         @media print {
+          .name-pill { background: #fff !important; border: 1px solid #cbd5e0; color: #1a202c !important; }
           .sheet-table th,
           .sheet-table td { border-color: #1a202c !important; }
           .sheet-table th { background: #e8ecf0 !important; color: #1a202c !important; }

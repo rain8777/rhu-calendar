@@ -217,3 +217,7 @@ a{color:inherit;text-decoration:none}
   .view.flush{padding:0!important}
   .frame.week{overflow:visible}
 }
+
+/* Medic Support: the people line stands out from the grey location line */
+.chip .cs.nm,.card small.nm{color:var(--ink);font-weight:600}
+@media print{.chip .cs.nm{color:#1a202c!important;font-weight:700}}

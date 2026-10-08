@@ -3,7 +3,7 @@ import { getTeamColor, MEDIC_TYPES } from "../lib/constants";
 import { CloseIcon } from "./Icons";
 import { parseMeta, buildDetails } from "../lib/meta";
 
-export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType, programId, barangays = [], nameSuggestions = [] }) {
+export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType, programId, barangays = [], nameSuggestions = [], dutySuggestions = [] }) {
   // Close on backdrop click only if the press AND the release both happened on the backdrop.
   // (Dragging a text selection out of the modal must not dismiss it.)
   const pressedOnBackdrop = useRef(false);
@@ -24,6 +24,7 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
   const [venueLocation, setVenueLocation] = useState(parsed[0] || "");
   const [actBarangay, setActBarangay] = useState(meta.barangay || "");
   const [names, setNames] = useState(meta.names || []);
+  const [duty, setDuty] = useState(meta.duty || "");
   const [nameInput, setNameInput] = useState("");
   const nameBox = useRef(null);
 
@@ -52,7 +53,7 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
     if (isMedic && allNames.length === 0) { setError("Add at least one name."); return; }
     setSaving(true); setError("");
     const finalDetails = isActivity
-      ? buildDetails({ venue: venueLocation, barangay: actBarangay, names: isMedic ? allNames : [], text: details })
+      ? buildDetails({ venue: venueLocation, barangay: actBarangay, names: isMedic ? allNames : [], duty: isMedic ? duty : "", text: details })
       : programId === "nip" ? buildDetails({ venue: venueLocation, text: details }) : details;
     try {
       // Only boards with a color picker store a color; the others derive it (barangay / type) when displayed.
@@ -98,6 +99,13 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
                 {typeOptions.map((t) => (<option key={t.name} value={t.name}>{t.name}</option>))}
               </select>
               {venue && <div className="color-bar" style={{ background: (MEDIC_TYPES.find((t) => t.name === venue) || {}).color || "#8892b0" }} />}
+            </div>
+            <div className="field">
+              <label>Duty Assignment (optional)</label>
+              <input type="text" list="medic-duty-list" value={duty} onChange={(e) => setDuty(e.target.value)} placeholder="e.g. Typhoon Uwan, Basketball game, Disaster Response" />
+              <datalist id="medic-duty-list">
+                {dutySuggestions.map((d) => (<option key={d} value={d} />))}
+              </datalist>
             </div>
             <div className="field">
               <label>Names *</label>

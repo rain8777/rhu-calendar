@@ -8,7 +8,7 @@ import { PROGRAMS, getTeamColor, getMedicColor, getTeamName, MONTHS, DAYS_OF_WEE
 import * as I from "./Icons";
 import { parseMeta } from "../lib/meta";
 
-const ICONS = { hospital: I.HospitalIcon, vaccine: I.VaccineIcon, heart: I.HeartIcon, family: I.FamilyIcon, transport: I.TransportIcon, activity: I.ActivityIcon, medical: I.MedicalIcon, shield: I.ShieldIcon, leaf: I.LeafIcon };
+const ICONS = { hospital: I.HospitalIcon, vaccine: I.VaccineIcon, heart: I.HeartIcon, family: I.FamilyIcon, transport: I.TransportIcon, activity: I.ActivityIcon, medical: I.MedicalIcon, firstaid: I.FirstAidIcon, shield: I.ShieldIcon, leaf: I.LeafIcon };
 const VIEWS = [["month", "Month"], ["week", "Week"], ["day", "Day"], ["year", "Year"], ["agenda", "Agenda"], ["timeline", "Timeline"], ["table", "Table"]];
 
 const pad = (n) => String(n).padStart(2, "0");
@@ -96,22 +96,31 @@ export default function CalendarApp({ readOnly = false }) {
   const isMedic = program.type === "medic";
   const isAct = program.type === "activity" || isMedic; // boards that keep Location + Barangay in the details text
   const usesMeta = isAct || programId === "nip";
-  const meta = (ev) => (usesMeta ? parseMeta(ev.details) : { venue: "", barangay: "", names: [], text: ev.details || "" });
+  const meta = (ev) => (usesMeta ? parseMeta(ev.details) : { venue: "", barangay: "", duty: "", names: [], text: ev.details || "" });
   const barangays = program.barangays || [];
   const nameSuggestions = useMemo(() => {
     const seen = new Map();
     (byProgram.medic || []).forEach((e) => parseMeta(e.details).names.forEach((n) => { if (!seen.has(n.toLowerCase())) seen.set(n.toLowerCase(), n); }));
     return [...seen.values()].sort((a, b) => a.localeCompare(b));
   }, [byProgram.medic]);
+  const dutySuggestions = useMemo(() => {
+    const seen = new Map();
+    (byProgram.medic || []).forEach((e) => { const d = parseMeta(e.details).duty; if (d && !seen.has(d.toLowerCase())) seen.set(d.toLowerCase(), d); });
+    return [...seen.values()].sort((a, b) => a.localeCompare(b));
+  }, [byProgram.medic]);
   const bName = (ev) => { const id = meta(ev).barangay; return id ? getTeamName(id, barangays) : ""; };
   // grey sub-line shown under the activity name: "Location · Barangay"
-  // grey lines under the main label. Activities: "Location · Barangay". Medic Support: names, then "Location · Barangay".
+  // Lines shown under the main label. Activities: "Location · Barangay".
+  // Medic Support: Duty Assignment, names, then "Location · Barangay".
   const subs = (ev) => {
     if (!isAct) return [];
-    const m = meta(ev), where = [m.venue, bName(ev)].filter(Boolean).join(" · ");
-    return (isMedic ? [m.names.join(", "), where] : [where]).filter(Boolean);
+    const m = meta(ev), where = [m.venue, bName(ev)].filter(Boolean).join(" · "), out = [];
+    if (isMedic && m.duty) out.push({ t: m.duty, k: "du" });
+    if (isMedic && m.names.length) out.push({ t: m.names.join(", "), k: "nm" });
+    if (where) out.push({ t: where, k: "" });
+    return out;
   };
-  const sub = (ev) => subs(ev).join(" — ");
+  const sub = (ev) => subs(ev).map((x) => x.t).join(" — ");
   const teamName = (ev) => getTeamName(ev.team, teams);
   const label = (ev) => (programId === "nip" ? teamName(ev) : isMedic ? ev.venue || "Medic support" : isAct ? ev.venue || bName(ev) || "Untitled activity" : ev.venue || teamName(ev));
   const colorOf = (ev) => ev.color || (isMedic ? getMedicColor(ev.venue) : getTeamColor(ev.team));
@@ -123,7 +132,7 @@ export default function CalendarApp({ readOnly = false }) {
       if (brgy && (isAct ? m.barangay : e.team) !== brgy) return false;
       if (!s) return true;
       const bn = isAct ? (m.barangay ? getTeamName(m.barangay, barangays) : "") : getTeamName(e.team, teams);
-      return [e.venue, m.text, m.venue, bn, ...(m.names || [])].some((v) => (v || "").toLowerCase().includes(s));
+      return [e.venue, m.text, m.venue, bn, m.duty, ...(m.names || [])].some((v) => (v || "").toLowerCase().includes(s));
     });
   }, [events, q, brgy, teams, barangays, isAct]);
   const byDate = useMemo(() => {
@@ -171,7 +180,7 @@ export default function CalendarApp({ readOnly = false }) {
     const sb = sub(ev), lines = subs(ev);
     return (
       <div key={ev.id} role="button" tabIndex={0} className={`chip${sb ? " two" : ""}${ovf ? " ovf" : ""}`} style={{ "--c": colorOf(ev) }} title={sb ? `${label(ev)} — ${sb}` : label(ev)} onClick={(e) => openEv(ev, e)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openEv(ev, e); } }}>
-        <span className="ct">{label(ev)}</span>{lines.map((t, i) => <span key={i} className={`cs${isMedic && i === 0 && meta(ev).names.length ? " nm" : ""}`}>{t}</span>)}
+        <span className="ct">{label(ev)}</span>{lines.map((x, i) => <span key={i} className={`cs${x.k ? " " + x.k : ""}`}>{x.t}</span>)}
       </div>
     );
   };
@@ -181,7 +190,7 @@ export default function CalendarApp({ readOnly = false }) {
       <button key={ev.id} className="card" style={{ "--c": colorOf(ev) }} onClick={(e) => openEv(ev, e)}>
         <b>{label(ev)}</b>
         {isAct
-          ? lines.map((t, i) => <small key={i} className={isMedic && i === 0 && m.names.length ? "nm" : ""}>{t}</small>)
+          ? lines.map((x, i) => <small key={i} className={x.k}>{x.t}</small>)
           : <>{teams.length > 0 && ev.venue && <small>{teamName(ev)}</small>}{m.venue && <small>{m.venue}</small>}</>}
         {m.text && <p>{m.text}</p>}
       </button>
@@ -289,8 +298,9 @@ export default function CalendarApp({ readOnly = false }) {
     let total = 0;
     shown.filter((e) => e.date.startsWith(pre)).forEach((e) => {
       total++;
-      const key = teams.length ? e.team : (e.venue || "").trim().toLowerCase() || "~" + label(e);
-      const r = (rows[key] = rows[key] || { key, name: teams.length ? teamName(e) : label(e), color: colorOf(e), days: {}, count: 0 });
+      const duty = isMedic ? meta(e).duty : "";
+      const key = teams.length ? e.team : isMedic ? `${e.venue}|${duty.toLowerCase()}` : (e.venue || "").trim().toLowerCase() || "~" + label(e);
+      const r = (rows[key] = rows[key] || { key, name: teams.length ? teamName(e) : isMedic ? duty || label(e) : label(e), kind: isMedic && duty ? label(e) : "", color: colorOf(e), days: {}, count: 0 });
       const d = +e.date.slice(8);
       (r.days[d] = r.days[d] || []).push(e);
       r.count++;
@@ -312,7 +322,7 @@ export default function CalendarApp({ readOnly = false }) {
     return (
       <div className="frame tlf" style={{ "--nd": n }}>
         <div className="tlbar">
-          <b>{list.length} {teams.length ? (list.length === 1 ? "barangay" : "barangays") : (isMedic ? (list.length === 1 ? "type" : "types") : (list.length === 1 ? "activity" : "activities"))}</b>
+          <b>{list.length} {teams.length ? (list.length === 1 ? "barangay" : "barangays") : (isMedic ? (list.length === 1 ? "assignment" : "assignments") : (list.length === 1 ? "activity" : "activities"))}</b>
           <span>{total} schedule{total === 1 ? "" : "s"} in {MONTHS[cm]}</span>
           <span className="sp" />
           <span className="lgd"><i className="sw" style={{ background: "var(--sub)" }} />Weekend</span>
@@ -320,7 +330,7 @@ export default function CalendarApp({ readOnly = false }) {
           <span className="lgd"><i className="sw" style={{ background: "#6b7280" }} />Scheduled</span>
         </div>
         <div className="tl" style={{ "--nd": n, gridTemplateColumns: `var(--lw) repeat(${n}, minmax(24px, 1fr))`, gridTemplateRows: `28px 48px repeat(${list.length}, minmax(48px, auto))` }}>
-          <div className="corner" style={{ gridRow: "1 / span 2", gridColumn: 1 }}>{teams.length ? "Barangay" : isMedic ? "Type" : "Activity"}</div>
+          <div className="corner" style={{ gridRow: "1 / span 2", gridColumn: 1 }}>{teams.length ? "Barangay" : isMedic ? "Duty / Type" : "Activity"}</div>
           {bands.map((b) => <div key={"w" + b.from} className="wk" style={{ gridRow: 1, gridColumn: `${b.from + 1} / span ${b.len}` }}>{MONTHS[cm].slice(0, 3)} {b.from}{b.len > 1 ? `–${b.from + b.len - 1}` : ""}</div>)}
           {Array.from({ length: n }, (_, i) => { const x = dayInfo(i); return (
             <div key={"h" + i} className={`dcell${x.we ? " we" : ""}${x.td ? " td" : ""}`} style={{ gridRow: 2, gridColumn: i + 2 }}><small>{DAYS_OF_WEEK[x.d.getDay()][0]}</small><b>{i + 1}</b></div>
@@ -328,7 +338,7 @@ export default function CalendarApp({ readOnly = false }) {
           {list.map((r, ri) => [
             <div key={"l" + r.key} className={`rl${ri % 2 ? " z" : ""}`} style={{ gridRow: ri + 3, gridColumn: 1 }}>
               <span className="av" style={{ "--c": r.color }}>{initials(r.name)}</span>
-              <span className="rt"><b title={r.name}>{r.name}</b><small>{r.count} schedule{r.count === 1 ? "" : "s"}</small></span>
+              <span className="rt"><b title={r.name}>{r.name}</b><small>{r.kind ? r.kind + " · " : ""}{r.count} schedule{r.count === 1 ? "" : "s"}</small></span>
             </div>,
             ...Array.from({ length: n }, (_, i) => { const x = dayInfo(i); return (
               <div key={r.key + "c" + i} className={`bg${x.we ? " we" : ""}${x.td ? " td" : ""}${ri % 2 ? " z" : ""}`} style={{ gridRow: ri + 3, gridColumn: i + 2 }} />
@@ -441,7 +451,7 @@ export default function CalendarApp({ readOnly = false }) {
         </main>
       </div>
 
-      {modal && <EventModal event={modal.event} defaultDate={modal.defaultDate} onSave={save} onDelete={remove} onClose={() => setModal(null)} theme={theme} teams={teams} barangays={barangays} nameSuggestions={nameSuggestions} eventTitle={program.title} programType={program.type} programId={programId} />}
+      {modal && <EventModal event={modal.event} defaultDate={modal.defaultDate} onSave={save} onDelete={remove} onClose={() => setModal(null)} theme={theme} teams={teams} barangays={barangays} nameSuggestions={nameSuggestions} dutySuggestions={dutySuggestions} eventTitle={program.title} programType={program.type} programId={programId} />}
     </>
   );
 }

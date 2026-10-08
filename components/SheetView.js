@@ -260,7 +260,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                     <th>Venue</th>
                   </>
                 ) : (
-                  teams.length > 0 ? <th>Barangay</th> : isMedic ? (<><th>Type</th><th>Names</th><th>Location</th><th>Barangay</th></>) : (<><th>Activity</th><th>Location</th><th>Barangay</th></>)
+                  teams.length > 0 ? <th>Barangay</th> : isMedic ? (<><th>Type</th><th>Duty Assignment</th><th>Names</th><th>Location</th><th>Barangay</th></>) : (<><th>Activity</th><th>Location</th><th>Barangay</th></>)
                 )}
                 <th>Details</th>
                 {!readOnly && <th></th>}
@@ -291,6 +291,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
                           {ev.venue || "—"}
                         </span>
                       </td>
+                      <td>{parseMeta(ev.details).duty || <span className="dash">—</span>}</td>
                       <td className="names-cell">
                         {parseMeta(ev.details).names.length
                           ? parseMeta(ev.details).names.map((n) => (<span key={n} className="name-pill">{n}</span>))

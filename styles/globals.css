@@ -221,3 +221,7 @@ a{color:inherit;text-decoration:none}
 /* Medic Support: the people line stands out from the grey location line */
 .chip .cs.nm,.card small.nm{color:var(--ink);font-weight:600}
 @media print{.chip .cs.nm{color:#1a202c!important;font-weight:700}}
+
+/* Medic Support: the duty assignment (e.g. "Typhoon Uwan") picks up the schedule's own color */
+.chip .cs.du,.card small.du{color:color-mix(in srgb,var(--c) 62%,var(--ink));font-weight:700}
+@media print{.chip .cs.du{color:#1a202c!important;font-weight:700}}

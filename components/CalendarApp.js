@@ -96,7 +96,7 @@ export default function CalendarApp({ readOnly = false }) {
   const isMedic = program.type === "medic";
   const isAct = program.type === "activity" || isMedic; // boards that keep Location + Barangay in the details text
   const usesMeta = isAct || programId === "nip";
-  const meta = (ev) => (usesMeta ? parseMeta(ev.details) : { venue: "", barangay: "", duty: "", names: [], text: ev.details || "" });
+  const meta = useCallback((ev) => (usesMeta ? parseMeta(ev.details) : { venue: "", barangay: "", duty: "", names: [], text: ev.details || "" }), [usesMeta]);
   const barangays = program.barangays || [];
   const nameSuggestions = useMemo(() => {
     const seen = new Map();
@@ -134,7 +134,7 @@ export default function CalendarApp({ readOnly = false }) {
       const bn = isAct ? (m.barangay ? getTeamName(m.barangay, barangays) : "") : getTeamName(e.team, teams);
       return [e.venue, m.text, m.venue, bn, m.duty, ...(m.names || [])].some((v) => (v || "").toLowerCase().includes(s));
     });
-  }, [events, q, brgy, teams, barangays, isAct]);
+  }, [events, q, brgy, teams, barangays, isAct, meta]);
   const byDate = useMemo(() => {
     const m = {};
     shown.forEach((e) => { (m[e.date] = m[e.date] || []).push(e); });
@@ -379,12 +379,12 @@ export default function CalendarApp({ readOnly = false }) {
             {PROGRAMS.map((p) => {
               const Ic = ICONS[p.icon] || I.HospitalIcon;
               return (
-                <button key={p.id} className={`board${p.id === programId ? " on" : ""}`} onClick={() => { setProgramId(p.id); setSel(null); setBrgy(""); setMenu(false); }}>
+                <button key={p.id} className={`board${p.id === programId ? " on" : ""}`} onClick={() => { setProgramId(p.id); setSel(null); setBrgy(""); setQ(""); setMenu(false); }}>
                   <Ic size={18} /><span className="t">{p.label}</span>{byProgram[p.id] && <em>{byProgram[p.id].length}</em>}
                 </button>
               );
             })}
-            {(!isAct || barangays.length > 0) && <>
+            {view !== "table" && (!isAct || barangays.length > 0) && <>
               <h4>Filter by barangay</h4>
               {program.northTeams ? <><h4 style={{ paddingTop: 2 }}>North</h4>{legend(program.northTeams)}<h4>South</h4>{legend(program.southTeams)}</> : legend(isAct ? barangays : teams)}
             </>}

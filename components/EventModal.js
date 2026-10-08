@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { getTeamColor, MEDIC_TYPES } from "../lib/constants";
 import { CloseIcon } from "./Icons";
 import { parseMeta, buildDetails } from "../lib/meta";
@@ -6,9 +6,27 @@ import { parseMeta, buildDetails } from "../lib/meta";
 export default function EventModal({ event, defaultDate, onSave, onDelete, onClose, theme, teams, eventTitle, programType, programId, barangays = [], nameSuggestions = [], dutySuggestions = [] }) {
   // Close on backdrop click only if the press AND the release both happened on the backdrop.
   // (Dragging a text selection out of the modal must not dismiss it.)
+  const boxRef = useRef(null);
   const pressedOnBackdrop = useRef(false);
   const releasedOnBackdrop = useRef(false);
   const dk = theme === "dark";
+  // Focus the first field when it opens (desktop only, so phones don't pop the keyboard), and give focus back on close.
+  useEffect(() => {
+    const prev = document.activeElement;
+    if (window.matchMedia && window.matchMedia("(pointer: fine)").matches && boxRef.current) {
+      const f = boxRef.current.querySelector("input:not([readonly]):not([disabled]), select, textarea");
+      if (f) f.focus();
+    }
+    return () => { if (prev && prev.focus) prev.focus(); };
+  }, []);
+  const trapTab = (e) => {
+    if (e.key !== "Tab" || !boxRef.current) return;
+    const els = [...boxRef.current.querySelectorAll("button:not([disabled]), input:not([disabled]), select, textarea")].filter((x) => x.offsetParent !== null);
+    if (!els.length) return;
+    const first = els[0], last = els[els.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  };
   const isMedic = programType === "medic";
   const isActivity = programType === "activity" || isMedic; // both keep Location + Barangay in the details text
   const activityRequired = eventTitle === "Family Planning";
@@ -79,10 +97,10 @@ export default function EventModal({ event, defaultDate, onSave, onDelete, onClo
       onMouseUp={(e) => { releasedOnBackdrop.current = e.target === e.currentTarget; }}
       onClick={() => { const ok = pressedOnBackdrop.current && releasedOnBackdrop.current; pressedOnBackdrop.current = false; releasedOnBackdrop.current = false; if (ok) onClose(); }}
     >
-      <div className="box" onClick={(e) => e.stopPropagation()}>
+      <div className="box" ref={boxRef} role="dialog" aria-modal="true" aria-label={event ? "Edit schedule" : "Add schedule"} onKeyDown={trapTab} onClick={(e) => e.stopPropagation()}>
         <div className="header">
           <h2>{isEdit ? "Edit Schedule" : "Add Schedule"}</h2>
-          <button className="close-btn" onClick={onClose}><CloseIcon size={16} /></button>
+          <button className="close-btn" aria-label="Close" onClick={onClose}><CloseIcon size={16} /></button>
         </div>
 
         <div className="field">

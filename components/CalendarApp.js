@@ -7,9 +7,15 @@ import SignaturePrint from "./SignaturePrint";
 import { PROGRAMS, getTeamColor, getMedicColor, getTeamName, MONTHS, DAYS_OF_WEEK } from "../lib/constants";
 import * as I from "./Icons";
 import { parseMeta } from "../lib/meta";
+import PersonnelModal from "./PersonnelModal"; // PERSONNEL-TRACKER
+import PersonnelBoard, { PersonnelIcon } from "./PersonnelBoard"; // PERSONNEL-TRACKER
+import { personnelType, personnelColor, parsePersonnel, expandPersonnel, formatRange, eventRange, nameColor, personnelNames, personnelPositions, positionByName } from "../lib/personnel"; // PERSONNEL-TRACKER
 
 const ICONS = { hospital: I.HospitalIcon, vaccine: I.VaccineIcon, heart: I.HeartIcon, family: I.FamilyIcon, transport: I.TransportIcon, activity: I.ActivityIcon, medical: I.MedicalIcon, firstaid: I.FirstAidIcon, shield: I.ShieldIcon, leaf: I.LeafIcon };
+ICONS.personnel = PersonnelIcon; // PERSONNEL-TRACKER
 const VIEWS = [["month", "Month"], ["week", "Week"], ["day", "Day"], ["year", "Year"], ["agenda", "Agenda"], ["timeline", "Timeline"], ["table", "Table"]];
+
+const PERSONNEL_VIEWS = [["board", "Board"], ...VIEWS.filter(([id]) => id !== "table")]; // PERSONNEL-TRACKER
 
 const pad = (n) => String(n).padStart(2, "0");
 const ds = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -93,6 +99,14 @@ export default function CalendarApp({ readOnly = false }) {
   }
 
   const teams = program.teams || [];
+  const isPersonnel = program.type === "personnel"; // PERSONNEL-TRACKER
+  const viewList = isPersonnel ? PERSONNEL_VIEWS : VIEWS; // PERSONNEL-TRACKER
+  const wasPersonnel = useRef(false); // PERSONNEL-TRACKER
+  useEffect(() => { // PERSONNEL-TRACKER
+    if (isPersonnel && !wasPersonnel.current) setView("board");
+    if (!isPersonnel && wasPersonnel.current) setView((v) => (v === "board" ? "month" : v));
+    wasPersonnel.current = isPersonnel;
+  }, [isPersonnel]);
   const isMedic = program.type === "medic";
   const isAct = program.type === "activity" || isMedic; // boards that keep Location + Barangay in the details text
   const usesMeta = isAct || programId === "nip";
@@ -113,6 +127,12 @@ export default function CalendarApp({ readOnly = false }) {
   // Lines shown under the main label. Activities: "Location · Barangay".
   // Medic Support: Duty Assignment, names, then "Location · Barangay".
   const subs = (ev) => {
+    if (isPersonnel) { // PERSONNEL-TRACKER: type, position, and the dates when it is a from–to entry
+      const p = parsePersonnel(ev.details), r = eventRange(ev), out = [{ t: personnelType(ev.team).name, k: "du" }];
+      if (p.position) out.push({ t: p.position, k: "" });
+      if (r.days > 1) out.push({ t: formatRange(r.start, r.end), k: "" });
+      return out;
+    }
     if (!isAct) return [];
     const m = meta(ev), where = [m.venue, bName(ev)].filter(Boolean).join(" · "), out = [];
     if (isMedic && m.duty) out.push({ t: m.duty, k: "du" });
@@ -122,8 +142,8 @@ export default function CalendarApp({ readOnly = false }) {
   };
   const sub = (ev) => subs(ev).map((x) => x.t).join(" — ");
   const teamName = (ev) => getTeamName(ev.team, teams);
-  const label = (ev) => (programId === "nip" ? teamName(ev) : isMedic ? ev.venue || "Medic support" : isAct ? ev.venue || bName(ev) || "Untitled activity" : ev.venue || teamName(ev));
-  const colorOf = (ev) => ev.color || (isMedic ? getMedicColor(ev.venue) : getTeamColor(ev.team));
+  const label = (ev) => (isPersonnel ? ev.venue || "Unnamed" : programId === "nip" ? teamName(ev) : isMedic ? ev.venue || "Medic support" : isAct ? ev.venue || bName(ev) || "Untitled activity" : ev.venue || teamName(ev)); // PERSONNEL-TRACKER
+  const colorOf = (ev) => ev.color || (isPersonnel ? personnelColor(ev.team) : isMedic ? getMedicColor(ev.venue) : getTeamColor(ev.team)); // PERSONNEL-TRACKER
 
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase();
@@ -131,15 +151,17 @@ export default function CalendarApp({ readOnly = false }) {
       const m = meta(e);
       if (brgy && (isAct ? m.barangay : e.team) !== brgy) return false;
       if (!s) return true;
+      if (isPersonnel) { const p = parsePersonnel(e.details); return [e.venue, e.team, p.position, p.text].some((v) => (v || "").toLowerCase().includes(s)); } // PERSONNEL-TRACKER
       const bn = isAct ? (m.barangay ? getTeamName(m.barangay, barangays) : "") : getTeamName(e.team, teams);
       return [e.venue, m.text, m.venue, bn, m.duty, ...(m.names || [])].some((v) => (v || "").toLowerCase().includes(s));
     });
-  }, [events, q, brgy, teams, barangays, isAct, meta]);
+  }, [events, q, brgy, teams, barangays, isAct, isPersonnel, meta]);
+  const shownX = useMemo(() => (isPersonnel ? expandPersonnel(shown) : shown), [shown, isPersonnel]); // PERSONNEL-TRACKER: one item per day for from–to entries
   const byDate = useMemo(() => {
     const m = {};
-    shown.forEach((e) => { (m[e.date] = m[e.date] || []).push(e); });
+    shownX.forEach((e) => { (m[e.date] = m[e.date] || []).push(e); });
     return m;
-  }, [shown]);
+  }, [shownX]);
   const on = (d) => byDate[ds(d)] || [];
 
   const cy = cursor.getFullYear(), cm = cursor.getMonth();
@@ -149,7 +171,7 @@ export default function CalendarApp({ readOnly = false }) {
     if (view === "week") { const a = addDays(cursor, -cursor.getDay()); return [ds(a), ds(addDays(a, 6)), "this week"]; }
     return [`${cy}-${pad(cm + 1)}-01`, `${cy}-${pad(cm + 1)}-31`, "this month"];
   })();
-  const rangeCount = shown.filter((e) => e.date >= range[0] && e.date <= range[1]).length;
+  const rangeCount = new Set(shownX.filter((e) => e.date >= range[0] && e.date <= range[1]).map((e) => e.id)).size; // PERSONNEL-TRACKER: counts entries, not days
 
   function step(n) {
     setCursor((c) => {
@@ -172,8 +194,8 @@ export default function CalendarApp({ readOnly = false }) {
     if (view === "table") return "All schedules";
     return `${MONTHS[cm]} ${cy}`;
   };
-  const addAt = (d) => !readOnly && setModal({ event: null, defaultDate: d });
-  const openEv = (ev, e) => { e && e.stopPropagation(); readOnly ? setSel(ev.date) : setModal({ event: ev, defaultDate: ev.date }); };
+  const addAt = (d, type) => !readOnly && setModal({ event: null, defaultDate: d, defaultType: type }); // PERSONNEL-TRACKER (type is only used by that tab)
+  const openEv = (ev, e) => { e && e.stopPropagation(); const o = ev._orig || ev; /* PERSONNEL-TRACKER: edit the saved entry, not a per-day copy */ readOnly ? setSel(ev.date) : setModal({ event: o, defaultDate: o.date }); };
   const goDay = (d) => { setCursor(d); setView("day"); setSel(null); };
 
   const Chip = ({ ev, ovf }) => {
@@ -185,11 +207,11 @@ export default function CalendarApp({ readOnly = false }) {
     );
   };
   const Card = ({ ev }) => {
-    const m = meta(ev), lines = subs(ev);
+    const m = isPersonnel ? { venue: "", text: parsePersonnel(ev.details).text } : meta(ev), lines = subs(ev); // PERSONNEL-TRACKER
     return (
       <button key={ev.id} className="card" style={{ "--c": colorOf(ev) }} onClick={(e) => openEv(ev, e)}>
         <b>{label(ev)}</b>
-        {isAct
+        {isAct || isPersonnel
           ? lines.map((x, i) => <small key={i} className={x.k}>{x.t}</small>)
           : <>{teams.length > 0 && ev.venue && <small>{teamName(ev)}</small>}{m.venue && <small>{m.venue}</small>}</>}
         {m.text && <p>{m.text}</p>}
@@ -208,7 +230,7 @@ export default function CalendarApp({ readOnly = false }) {
     return (
       <div className="frame grow" style={{ display: "flex", flexDirection: "column" }}>
         <div className="dow">{DAYS_OF_WEEK.map((d) => <div key={d}>{d}</div>)}</div>
-        <div className={`mgrid${isAct ? " tall" : ""}`} style={{ "--wk": weeks }}>
+        <div className={`mgrid${isAct || isPersonnel ? " tall" : ""}`} style={{ "--wk": weeks }}>
           {Array.from({ length: weeks * 7 }, (_, i) => {
             const d = addDays(start, i), k = ds(d), evs = byDate[k] || [];
             const cap = evs.some((e) => subs(e).length) ? 2 : 3;
@@ -295,15 +317,15 @@ export default function CalendarApp({ readOnly = false }) {
   function Timeline() {
     const n = new Date(cy, cm + 1, 0).getDate(), pre = `${cy}-${pad(cm + 1)}-`;
     const rows = {};
-    let total = 0;
-    shown.filter((e) => e.date.startsWith(pre)).forEach((e) => {
-      total++;
+    const allIds = new Set();
+    shownX.filter((e) => e.date.startsWith(pre)).forEach((e) => {
+      allIds.add(e.id);
       const duty = isMedic ? meta(e).duty : "";
-      const key = teams.length ? e.team : isMedic ? `${e.venue}|${duty.toLowerCase()}` : (e.venue || "").trim().toLowerCase() || "~" + label(e);
-      const r = (rows[key] = rows[key] || { key, name: teams.length ? teamName(e) : isMedic ? duty || label(e) : label(e), kind: isMedic && duty ? label(e) : "", color: colorOf(e), days: {}, count: 0 });
+      const key = isPersonnel ? (e.venue || "").trim().toLowerCase() : teams.length ? e.team : isMedic ? `${e.venue}|${duty.toLowerCase()}` : (e.venue || "").trim().toLowerCase() || "~" + label(e); // PERSONNEL-TRACKER
+      const r = (rows[key] = rows[key] || { key, name: teams.length ? teamName(e) : isMedic ? duty || label(e) : label(e), kind: isPersonnel ? parsePersonnel(e.details).position : isMedic && duty ? label(e) : "", color: isPersonnel ? nameColor(e.venue) : colorOf(e), days: {}, ids: new Set() }); // PERSONNEL-TRACKER
       const d = +e.date.slice(8);
       (r.days[d] = r.days[d] || []).push(e);
-      r.count++;
+      r.ids.add(e.id);
     });
     const list = Object.values(rows).sort((a, b) => a.name.localeCompare(b.name));
     if (!list.length) return <div className="frame grow"><Empty text={`No schedules in ${MONTHS[cm]}`} /></div>;
@@ -314,7 +336,7 @@ export default function CalendarApp({ readOnly = false }) {
     for (let d = 1; d <= n;) { const len = Math.min(7 - new Date(cy, cm, d).getDay(), n - d + 1); bands.push({ from: d, len }); d += len; }
     const runsOf = (r) => {
       const ds_ = Object.keys(r.days).map(Number).sort((a, b) => a - b), out = [];
-      ds_.forEach((d) => { const last = out[out.length - 1]; if (last && last.from + last.len === d) { last.len++; last.evs.push(...r.days[d]); } else out.push({ from: d, len: 1, evs: [...r.days[d]] }); });
+      ds_.forEach((d) => { const last = out[out.length - 1]; if (last && last.from + last.len === d && colorOf(last.evs[0]) === colorOf(r.days[d][0])) { last.len++; last.evs.push(...r.days[d]); } else out.push({ from: d, len: 1, evs: [...r.days[d]] }); });
       return out;
     };
     const tip = (e) => (sub(e) ? `${label(e)} — ${sub(e)}` : label(e));
@@ -322,15 +344,15 @@ export default function CalendarApp({ readOnly = false }) {
     return (
       <div className="frame tlf" style={{ "--nd": n }}>
         <div className="tlbar">
-          <b>{list.length} {teams.length ? (list.length === 1 ? "barangay" : "barangays") : (isMedic ? (list.length === 1 ? "assignment" : "assignments") : (list.length === 1 ? "activity" : "activities"))}</b>
-          <span>{total} schedule{total === 1 ? "" : "s"} in {MONTHS[cm]}</span>
+          <b>{list.length} {teams.length ? (list.length === 1 ? "barangay" : "barangays") : isPersonnel ? (list.length === 1 ? "person" : "people") : (isMedic ? (list.length === 1 ? "assignment" : "assignments") : (list.length === 1 ? "activity" : "activities"))}</b>
+          <span>{allIds.size} schedule{allIds.size === 1 ? "" : "s"} in {MONTHS[cm]}</span>
           <span className="sp" />
           <span className="lgd"><i className="sw" style={{ background: "var(--sub)" }} />Weekend</span>
           <span className="lgd"><i className="sw" style={{ background: "var(--brand)" }} />Today</span>
           <span className="lgd"><i className="sw" style={{ background: "#6b7280" }} />Scheduled</span>
         </div>
         <div className="tl" style={{ "--nd": n, gridTemplateColumns: `var(--lw) repeat(${n}, minmax(24px, 1fr))`, gridTemplateRows: `28px 48px repeat(${list.length}, minmax(48px, auto))` }}>
-          <div className="corner" style={{ gridRow: "1 / span 2", gridColumn: 1 }}>{teams.length ? "Barangay" : isMedic ? "Duty / Type" : "Activity"}</div>
+          <div className="corner" style={{ gridRow: "1 / span 2", gridColumn: 1 }}>{teams.length ? "Barangay" : isPersonnel ? "Personnel" : isMedic ? "Duty / Type" : "Activity"}</div>
           {bands.map((b) => <div key={"w" + b.from} className="wk" style={{ gridRow: 1, gridColumn: `${b.from + 1} / span ${b.len}` }}>{MONTHS[cm].slice(0, 3)} {b.from}{b.len > 1 ? `–${b.from + b.len - 1}` : ""}</div>)}
           {Array.from({ length: n }, (_, i) => { const x = dayInfo(i); return (
             <div key={"h" + i} className={`dcell${x.we ? " we" : ""}${x.td ? " td" : ""}`} style={{ gridRow: 2, gridColumn: i + 2 }}><small>{DAYS_OF_WEEK[x.d.getDay()][0]}</small><b>{i + 1}</b></div>
@@ -338,14 +360,14 @@ export default function CalendarApp({ readOnly = false }) {
           {list.map((r, ri) => [
             <div key={"l" + r.key} className={`rl${ri % 2 ? " z" : ""}`} style={{ gridRow: ri + 3, gridColumn: 1 }}>
               <span className="av" style={{ "--c": r.color }}>{initials(r.name)}</span>
-              <span className="rt"><b title={r.name}>{r.name}</b><small>{r.kind ? r.kind + " · " : ""}{r.count} schedule{r.count === 1 ? "" : "s"}</small></span>
+              <span className="rt"><b title={r.name}>{r.name}</b><small>{r.kind ? r.kind + " · " : ""}{r.ids.size} schedule{r.ids.size === 1 ? "" : "s"}</small></span>
             </div>,
             ...Array.from({ length: n }, (_, i) => { const x = dayInfo(i); return (
               <div key={r.key + "c" + i} className={`bg${x.we ? " we" : ""}${x.td ? " td" : ""}${ri % 2 ? " z" : ""}`} style={{ gridRow: ri + 3, gridColumn: i + 2 }} />
             ); }),
             ...runsOf(r).map((run) => (
-              <button key={r.key + "b" + run.from} className="tbar" style={{ "--c": colorOf(run.evs[0]), gridRow: ri + 3, gridColumn: `${run.from + 1} / span ${run.len}` }}
-                title={run.evs.map(tip).join("\n")} onClick={() => setSel(pre + pad(run.from))}>
+              <button key={r.key + "b" + run.from} className="tbar" style={{ "--c": colorOf(run.evs[0]), gridRow: ri + 3, gridColumn: `${run.from + 1} / span ${run.len}`, ...(isPersonnel && personnelType(run.evs[0].team).ink !== "#ffffff" ? { color: personnelType(run.evs[0].team).ink, textShadow: "none" } : {}) }}
+                title={[...new Map(run.evs.map((x) => [x.id, x])).values()].map(tip).join("\n")} onClick={() => setSel(pre + pad(run.from))}>
                 {run.len > 1 ? `${run.len} days` : run.evs.length > 1 ? run.evs.length : ""}
               </button>
             )),
@@ -362,7 +384,13 @@ export default function CalendarApp({ readOnly = false }) {
       <span className="dot" style={{ background: getTeamColor(t.id) }} />{t.name}
     </button>
   ));
-  const Views = { month: Month, week: Week, day: Day, year: Year, agenda: Agenda, timeline: Timeline }[view];
+  const pNames = useMemo(() => personnelNames(byProgram.personnel || []), [byProgram.personnel]); // PERSONNEL-TRACKER
+  const pPositions = useMemo(() => personnelPositions(byProgram.personnel || []), [byProgram.personnel]); // PERSONNEL-TRACKER
+  const pPosMap = useMemo(() => positionByName(byProgram.personnel || []), [byProgram.personnel]); // PERSONNEL-TRACKER
+  function Board() { // PERSONNEL-TRACKER
+    return <PersonnelBoard events={shown} cursor={cursor} todayStr={todayStr} readOnly={readOnly} onOpen={(ev) => openEv(ev)} onAdd={(type) => addAt(sel || todayStr, type)} />;
+  }
+  const Views = { board: Board, month: Month, week: Week, day: Day, year: Year, agenda: Agenda, timeline: Timeline }[view];
 
   return (
     <>
@@ -384,7 +412,7 @@ export default function CalendarApp({ readOnly = false }) {
                 </button>
               );
             })}
-            {view !== "table" && (!isAct || barangays.length > 0) && <>
+            {view !== "table" && !isPersonnel && (!isAct || barangays.length > 0) && <>
               <h4>Filter by barangay</h4>
               {program.northTeams ? <><h4 style={{ paddingTop: 2 }}>North</h4>{legend(program.northTeams)}<h4>South</h4>{legend(program.southTeams)}</> : legend(isAct ? barangays : teams)}
             </>}
@@ -404,7 +432,7 @@ export default function CalendarApp({ readOnly = false }) {
             {!readOnly && <button className="hb primary" onClick={() => addAt(sel || (view === "day" ? ds(cursor) : todayStr))}>+ <span className="lb">New schedule</span></button>}
           </div>
           <div className="tabs" role="tablist">
-            {VIEWS.map(([id, name]) => <button key={id} role="tab" aria-selected={view === id} className={`tab${view === id ? " on" : ""}`} onClick={() => { setView(id); setSel(null); }}>{name}</button>)}
+            {viewList.map(([id, name]) => <button key={id} role="tab" aria-selected={view === id} className={`tab${view === id ? " on" : ""}`} onClick={() => { setView(id); setSel(null); }}>{name}</button>)}
           </div>
           {view !== "table" && (
             <div className="bar">
@@ -451,7 +479,8 @@ export default function CalendarApp({ readOnly = false }) {
         </main>
       </div>
 
-      {modal && <EventModal event={modal.event} defaultDate={modal.defaultDate} onSave={save} onDelete={remove} onClose={() => setModal(null)} theme={theme} teams={teams} barangays={barangays} nameSuggestions={nameSuggestions} dutySuggestions={dutySuggestions} eventTitle={program.title} programType={program.type} programId={programId} />}
+      {modal && isPersonnel && <PersonnelModal event={modal.event} defaultDate={modal.defaultDate} defaultType={modal.defaultType} onSave={save} onDelete={remove} onClose={() => setModal(null)} theme={theme} nameSuggestions={pNames} positionSuggestions={pPositions} positionByName={pPosMap} />}{/* PERSONNEL-TRACKER */}
+      {modal && !isPersonnel && <EventModal event={modal.event} defaultDate={modal.defaultDate} onSave={save} onDelete={remove} onClose={() => setModal(null)} theme={theme} teams={teams} barangays={barangays} nameSuggestions={nameSuggestions} dutySuggestions={dutySuggestions} eventTitle={program.title} programType={program.type} programId={programId} />}
     </>
   );
 }

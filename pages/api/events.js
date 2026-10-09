@@ -9,12 +9,11 @@ const GAS_SECRET = process.env.GAS_SECRET;
 const GAS_URL_MAP = {
   purokalusugan: process.env.NEXT_PUBLIC_GAS_URL,
   nip:           process.env.NEXT_PUBLIC_GAS_URL_NIP           || process.env.NEXT_PUBLIC_GAS_URL,
-  philhealth:    process.env.NEXT_PUBLIC_GAS_URL_PHILHEALTH     || process.env.NEXT_PUBLIC_GAS_URL,
   ncd:           process.env.NEXT_PUBLIC_GAS_URL_NCD            || process.env.NEXT_PUBLIC_GAS_URL,
-  mnao:          process.env.NEXT_PUBLIC_GAS_URL_MNAO           || process.env.NEXT_PUBLIC_GAS_URL,
-  familyplanning:process.env.NEXT_PUBLIC_GAS_URL_FAMILYPLANNING || process.env.NEXT_PUBLIC_GAS_URL,
   transportation:process.env.NEXT_PUBLIC_GAS_URL_TRANSPORTATION || process.env.NEXT_PUBLIC_GAS_URL,
   rhuactivities:  process.env.NEXT_PUBLIC_GAS_URL_RHUACTIVITIES   || process.env.NEXT_PUBLIC_GAS_URL,
+  medic:          process.env.NEXT_PUBLIC_GAS_URL, // Medic Support shares the main sheet
+  personnel:      process.env.NEXT_PUBLIC_GAS_URL, // PERSONNEL-TRACKER shares the main sheet
 };
 
 export default async function handler(req, res) {
@@ -23,7 +22,7 @@ export default async function handler(req, res) {
   // GET ?program=all — load every board in ONE request. Each distinct Google
   // Script URL is fetched once (boards sharing a sheet don't hit it again).
   if (req.method === "GET" && program === "all") {
-    const entries = Object.entries(GAS_URL_MAP).filter(([, u]) => u);
+    const entries = PROGRAMS.map((p) => [p.id, GAS_URL_MAP[p.id]]).filter(([, u]) => u);
     const urls = [...new Set(entries.map(([, u]) => u))];
     const raw = {};
     await Promise.all(urls.map(async (u) => {

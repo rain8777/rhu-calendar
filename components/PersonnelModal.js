@@ -1,7 +1,7 @@
 // PERSONNEL-TRACKER — the add/edit form for the Personnel Tracker tab (separate from EventModal on purpose).
 import { useState, useRef, useEffect } from "react";
 import { CloseIcon } from "./Icons";
-import { PERSONNEL_TYPES, personnelType, parsePersonnel, buildPersonnelDetails, eventRange } from "../lib/personnel";
+import { PERSONNEL_TYPES, personnelType, parsePersonnel, buildPersonnelDetails, eventRange, dayDiff } from "../lib/personnel";
 
 export default function PersonnelModal({ event, defaultDate, defaultType = "", onSave, onDelete, onClose, theme, nameSuggestions = [], positionSuggestions = [], positionByName = {} }) {
   const dk = theme === "dark";
@@ -57,6 +57,10 @@ export default function PersonnelModal({ event, defaultDate, defaultType = "", o
       if (to < from) { setError("The To date can't be before the From date."); return; }
       if (to > from) end = to;
     }
+    // catch mistyped years (e.g. 2062) and runaway ranges before they are saved
+    const yr = new Date().getFullYear(), okYear = (d) => { const y = Number(d.slice(0, 4)); return y >= yr - 10 && y <= yr + 5; };
+    if (!okYear(from) || (end && !okYear(end))) { setError(`Please check the year — it should be between ${yr - 10} and ${yr + 5}.`); return; }
+    if (end && dayDiff(from, end) + 1 > 366) { setError("A range can't be longer than one year. Please check the dates."); return; }
     setSaving(true); setError("");
     try {
       await onSave({ id: event?.id, team: type, venue: name.trim(), color: "", date: from, details: buildPersonnelDetails({ position, to: end, text: details }) });

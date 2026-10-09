@@ -32,7 +32,7 @@ export default function PersonnelBoard({ events, cursor, todayStr, readOnly, onO
 
   const rows = useMemo(() => events.map((ev) => {
     const p = parsePersonnel(ev.details), r = eventRange(ev);
-    return { ev, id: ev.id, name: ev.venue || "Unnamed", type: personnelType(ev.team).name, position: p.position, text: p.text, ...r };
+    return { ev, id: ev.id, name: (ev.venue || "").trim() || "Unnamed", type: personnelType(ev.team).name, position: p.position, text: p.text, ...r };
   }).sort((a, b) => a.start.localeCompare(b.start) || a.name.localeCompare(b.name)), [events]);
 
   const scoped = scope === "month" ? rows.filter((r) => r.start <= mEnd && r.end >= mStart) : rows;

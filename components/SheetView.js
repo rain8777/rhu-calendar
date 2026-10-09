@@ -1,5 +1,5 @@
 import { parseMeta } from "../lib/meta";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { getTeamColor, getTeamName, getMedicColor, MEDIC_TYPES } from "../lib/constants";
 import { SearchIcon, CloseIcon, RefreshIcon, PrinterIcon, DownloadIcon } from "./Icons";
 
@@ -27,6 +27,20 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
   const [filterBarangay, setFilterBarangay] = useState("");
   const [filterDetails,  setFilterDetails]  = useState("");
   const [filterName,     setFilterName]     = useState("");
+
+  // When the table is wider than its space (small laptop / tablet), let it scroll sideways. On wide screens it stays
+  // un-boxed so the header row can stay pinned while the page scrolls.
+  const [wrapEl, setWrapEl] = useState(null);
+  const [hscroll, setHscroll] = useState(false);
+  useEffect(() => {
+    if (!wrapEl) return;
+    const check = () => setHscroll(wrapEl.scrollWidth > wrapEl.clientWidth + 1);
+    check();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(check) : null;
+    if (ro) { ro.observe(wrapEl); const t = wrapEl.querySelector("table"); if (t) ro.observe(t); }
+    window.addEventListener("resize", check);
+    return () => { if (ro) ro.disconnect(); window.removeEventListener("resize", check); };
+  }, [wrapEl]);
 
   const filtered = useMemo(() => {
     return [...events]
@@ -247,7 +261,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
             : "No schedules match your filters."}
         </div>
       ) : (
-        <div className="table-wrap">
+        <div className={`table-wrap${hscroll ? " hscroll" : ""}`} ref={setWrapEl}>
           {showPrintTitle && <div className="print-title">{eventTitle}</div>}
           <table className="sheet-table">
             <thead>
@@ -423,6 +437,7 @@ export default function SheetView({ events, onEdit, onAdd, theme, onRefresh, ref
 
         .empty { color: ${dk ? "#8892b0" : "#a0aec0"}; text-align: center; padding: 60px 0; font-size: 0.95rem; }
 
+        .table-wrap.hscroll { overflow-x: auto; }
         .table-wrap { overflow: clip; border-radius: 8px; border: 1px solid ${dk ? "#2d3354" : "#e2e8f0"}; }
         .sheet-table { width: 100%; border-collapse: collapse; }
         .sheet-table th {

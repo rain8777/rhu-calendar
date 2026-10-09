@@ -32,7 +32,15 @@ async function apiPost(body, pid) {
 
 export default function CalendarApp({ readOnly = false }) {
   const now = useMemo(() => new Date(), []);
-  const todayStr = ds(now);
+  const [todayStr, setTodayStr] = useState(() => ds(now));
+  // Keep "today" correct if the page is left open past midnight (office PCs often stay on all night).
+  useEffect(() => {
+    const tick = () => setTodayStr((cur) => { const n = ds(new Date()); return n === cur ? cur : n; });
+    const id = setInterval(tick, 30000);
+    document.addEventListener("visibilitychange", tick);
+    window.addEventListener("focus", tick);
+    return () => { clearInterval(id); document.removeEventListener("visibilitychange", tick); window.removeEventListener("focus", tick); };
+  }, []);
   const [programId, setProgramId] = useState(PROGRAMS[0].id);
   const program = PROGRAMS.find((p) => p.id === programId) || PROGRAMS[0];
   const [view, setView] = useState("month");
@@ -142,7 +150,7 @@ export default function CalendarApp({ readOnly = false }) {
   };
   const sub = (ev) => subs(ev).map((x) => x.t).join(" — ");
   const teamName = (ev) => getTeamName(ev.team, teams);
-  const label = (ev) => (isPersonnel ? ev.venue || "Unnamed" : programId === "nip" ? teamName(ev) : isMedic ? ev.venue || "Medic support" : isAct ? ev.venue || bName(ev) || "Untitled activity" : ev.venue || teamName(ev)); // PERSONNEL-TRACKER
+  const label = (ev) => (isPersonnel ? (ev.venue || "").trim() || "Unnamed" : programId === "nip" ? teamName(ev) : isMedic ? ev.venue || "Medic support" : isAct ? ev.venue || bName(ev) || "Untitled activity" : ev.venue || teamName(ev)); // PERSONNEL-TRACKER
   const colorOf = (ev) => ev.color || (isPersonnel ? personnelColor(ev.team) : isMedic ? getMedicColor(ev.venue) : getTeamColor(ev.team)); // PERSONNEL-TRACKER
 
   const shown = useMemo(() => {
@@ -193,6 +201,13 @@ export default function CalendarApp({ readOnly = false }) {
     }
     if (view === "table") return "All schedules";
     return `${MONTHS[cm]} ${cy}`;
+  };
+  const newDate = () => {
+    if (sel) return sel;
+    if (view === "day") return ds(cursor);
+    if (view === "week") { const a = addDays(cursor, -cursor.getDay()); return todayStr >= ds(a) && todayStr <= ds(addDays(a, 6)) ? todayStr : ds(a); }
+    const mm = `${cy}-${pad(cm + 1)}`;
+    return todayStr.slice(0, 7) === mm ? todayStr : `${mm}-01`;
   };
   const addAt = (d, type) => !readOnly && setModal({ event: null, defaultDate: d, defaultType: type }); // PERSONNEL-TRACKER (type is only used by that tab)
   const openEv = (ev, e) => { e && e.stopPropagation(); const o = ev._orig || ev; /* PERSONNEL-TRACKER: edit the saved entry, not a per-day copy */ readOnly ? setSel(ev.date) : setModal({ event: o, defaultDate: o.date }); };
@@ -388,7 +403,7 @@ export default function CalendarApp({ readOnly = false }) {
   const pPositions = useMemo(() => personnelPositions(byProgram.personnel || []), [byProgram.personnel]); // PERSONNEL-TRACKER
   const pPosMap = useMemo(() => positionByName(byProgram.personnel || []), [byProgram.personnel]); // PERSONNEL-TRACKER
   function Board() { // PERSONNEL-TRACKER
-    return <PersonnelBoard events={shown} cursor={cursor} todayStr={todayStr} readOnly={readOnly} onOpen={(ev) => openEv(ev)} onAdd={(type) => addAt(sel || todayStr, type)} />;
+    return <PersonnelBoard events={shown} cursor={cursor} todayStr={todayStr} readOnly={readOnly} onOpen={(ev) => openEv(ev)} onAdd={(type) => addAt(newDate(), type)} />;
   }
   const Views = { board: Board, month: Month, week: Week, day: Day, year: Year, agenda: Agenda, timeline: Timeline }[view];
 
@@ -429,7 +444,7 @@ export default function CalendarApp({ readOnly = false }) {
             <button className="hb" onClick={() => loadAll()} disabled={pending} title="Refresh all boards"><I.RefreshIcon size={14} /><span className="lb">{stamp}</span></button>
             <SignaturePanel config={sig} onChange={saveSig} theme={theme} />
             <button className="hb" onClick={() => window.print()}><I.PrinterIcon size={14} /><span className="lb">Print</span></button>
-            {!readOnly && <button className="hb primary" onClick={() => addAt(sel || (view === "day" ? ds(cursor) : todayStr))}>+ <span className="lb">New schedule</span></button>}
+            {!readOnly && <button className="hb primary" onClick={() => addAt(newDate())}>+ <span className="lb">New schedule</span></button>}
           </div>
           <div className="tabs" role="tablist">
             {viewList.map(([id, name]) => <button key={id} role="tab" aria-selected={view === id} className={`tab${view === id ? " on" : ""}`} onClick={() => { setView(id); setSel(null); }}>{name}</button>)}
